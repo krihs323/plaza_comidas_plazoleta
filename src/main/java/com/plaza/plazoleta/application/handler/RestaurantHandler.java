@@ -1,16 +1,15 @@
 package com.plaza.plazoleta.application.handler;
 
 import com.plaza.plazoleta.application.dto.RestaurantRequest;
-import com.plaza.plazoleta.application.handler.IRestaurantHandler;
 import com.plaza.plazoleta.application.mapper.RestaurantRequestMapper;
 import com.plaza.plazoleta.application.mapper.RestaurantResponseMapper;
 import com.plaza.plazoleta.domain.api.IRestaurantServicePort;
 import com.plaza.plazoleta.domain.model.Restaurant;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-//@RequiredArgsConstructor
-//@Transactional
+@Transactional
 public class RestaurantHandler implements IRestaurantHandler {
 
     private final IRestaurantServicePort restaurantServicePort;

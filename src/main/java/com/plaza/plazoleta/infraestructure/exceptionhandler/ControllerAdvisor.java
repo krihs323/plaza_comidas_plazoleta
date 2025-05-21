@@ -1,5 +1,6 @@
 package com.plaza.plazoleta.infraestructure.exceptionhandler;
 
+import com.plaza.plazoleta.infraestructure.exception.MenuValidationException;
 import com.plaza.plazoleta.infraestructure.exception.RestaurantAlreadyExistException;
 import com.plaza.plazoleta.infraestructure.exception.RestaurantValidationException;
 import feign.FeignException;
@@ -36,6 +37,13 @@ public class ControllerAdvisor {
     @ExceptionHandler(RestaurantValidationException.class)
     public ResponseEntity<Map<String, String>> restaurantValidation(
             RestaurantValidationException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(MESSAGE, ex.getMessage()));
+    }
+
+    @ExceptionHandler(MenuValidationException.class)
+    public ResponseEntity<Map<String, String>> menuValidation(
+            MenuValidationException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Collections.singletonMap(MESSAGE, ex.getMessage()));
     }
