@@ -23,17 +23,12 @@ public class RestaurantUserCase implements IRestaurantServicePort {
     @Override
     public void saveRestaurant(Restaurant restaurant) {
 
-        System.out.println("Consulta de id usuario");
-
-
         Optional<User> rolByUserId = Optional.of(userPersistencePort.getById(restaurant.getUserId()));
-
-
-
         if (rolByUserId.get().getRol()!=2) {
             throw new RestaurantValidationException("El id del usuario no corresponde al de un rol Propietario");
         }
-
         restaurantPersistencePort.saveRestaurant(restaurant);
     }
+
+
 }
