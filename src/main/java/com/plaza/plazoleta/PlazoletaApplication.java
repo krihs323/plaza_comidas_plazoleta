@@ -1,9 +1,11 @@
-package com.example.plazoleta;
+package com.plaza.plazoleta;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
+@EnableFeignClients
 public class PlazoletaApplication {
 
 	public static void main(String[] args) {

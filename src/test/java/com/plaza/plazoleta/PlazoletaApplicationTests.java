@@ -1,4 +1,4 @@
-package com.example.plazoleta;
+package com.plaza.plazoleta;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
