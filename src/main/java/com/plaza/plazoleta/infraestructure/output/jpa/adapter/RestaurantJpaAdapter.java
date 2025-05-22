@@ -4,6 +4,7 @@ import com.plaza.plazoleta.domain.model.Restaurant;
 import com.plaza.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.plaza.plazoleta.infraestructure.exception.RestaurantAlreadyExistException;
 import com.plaza.plazoleta.infraestructure.exception.RestaurantValidationException;
+import com.plaza.plazoleta.infraestructure.exceptionhandler.ExceptionResponse;
 import com.plaza.plazoleta.infraestructure.output.jpa.entity.RestaurantEntity;
 import com.plaza.plazoleta.infraestructure.output.jpa.mapper.RestaurantEntityMapper;
 import com.plaza.plazoleta.infraestructure.output.jpa.repository.IRestaurantRepository;
@@ -34,7 +35,7 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
         if (restaurantEntity.isPresent()) {
             return restaurantEntityMapper.toRestaurant(restaurantEntity.orElseThrow());
         }
-        throw new RestaurantValidationException("No existe el restaurante");
+        throw new RestaurantValidationException(ExceptionResponse.RESTAURANT_VALIDATION_NOT_FOUND.getMessage());
 
     }
 

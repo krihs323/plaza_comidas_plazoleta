@@ -5,4 +5,8 @@ import com.plaza.plazoleta.application.dto.MenuRequest;
 public interface IMenuHandler {
 
     void saveMenu(MenuRequest menuRequest);
+
+    void updateMenu(Long id, MenuRequest menuRequest);
+
+
 }

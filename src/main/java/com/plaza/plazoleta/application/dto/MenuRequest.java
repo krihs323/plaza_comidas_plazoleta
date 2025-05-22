@@ -30,4 +30,6 @@ public class MenuRequest {
         @NotNull
         private Long restaurantId;
 
+        private Boolean active;
+
 }

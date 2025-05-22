@@ -4,8 +4,13 @@ import com.plaza.plazoleta.domain.model.Menu;
 import com.plaza.plazoleta.domain.model.Menu;
 import com.plaza.plazoleta.domain.spi.IMenuPersistencePort;
 import com.plaza.plazoleta.domain.spi.IMenuPersistencePort;
+import com.plaza.plazoleta.infraestructure.exception.MenuNotFoundException;
+import com.plaza.plazoleta.infraestructure.output.jpa.entity.MenuEntity;
 import com.plaza.plazoleta.infraestructure.output.jpa.mapper.MenuEntityMapper;
 import com.plaza.plazoleta.infraestructure.output.jpa.repository.IMenuRepository;
+
+import javax.swing.text.html.Option;
+import java.util.Optional;
 
 //@RequiredArgsConstructor
 public class MenuJpaAdapter implements IMenuPersistencePort {
@@ -24,8 +29,20 @@ public class MenuJpaAdapter implements IMenuPersistencePort {
     public void saveMenu(Menu menu) {
         //Antes de guardar
 
-
-
         menuRepository.save(menuEntityMapper.toEntity(menu));
+    }
+
+    @Override
+    public void updateMenu(Long id, Menu menu) {
+        MenuEntity menuNew = menuEntityMapper.toEntity(menu);
+        menuRepository.save(menuNew);
+    }
+
+    @Override
+    public Optional<Menu> findById(Long id) {
+
+        Optional<MenuEntity> menuEntity = menuRepository.findById(id);
+        return Optional.ofNullable(menuEntityMapper.toMenu(menuEntity.orElseThrow(() -> new MenuNotFoundException("No se encontró el Plato que intenta modificar"))));
+
     }
 }
