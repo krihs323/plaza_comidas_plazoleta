@@ -6,6 +6,7 @@ import com.plaza.plazoleta.domain.model.User;
 import com.plaza.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.plaza.plazoleta.domain.spi.IUserPersistencePort;
 import com.plaza.plazoleta.infraestructure.exception.RestaurantValidationException;
+import com.plaza.plazoleta.infraestructure.exceptionhandler.ExceptionResponse;
 
 import java.util.Optional;
 
@@ -25,7 +26,7 @@ public class RestaurantUserCase implements IRestaurantServicePort {
 
         Optional<User> rolByUserId = Optional.of(userPersistencePort.getById(restaurant.getUserId()));
         if (rolByUserId.get().getRol()!=2) {
-            throw new RestaurantValidationException("El id del usuario no corresponde al de un rol Propietario");
+            throw new RestaurantValidationException(ExceptionResponse.RESTAURANT_VALIDATION_NOT_ROL_VALID.getMessage());
         }
         restaurantPersistencePort.saveRestaurant(restaurant);
     }
