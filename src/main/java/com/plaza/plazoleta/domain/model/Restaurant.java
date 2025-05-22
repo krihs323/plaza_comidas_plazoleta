@@ -26,6 +26,9 @@ public class Restaurant {
         this.userId = userId;
     }
 
+    public Restaurant() {
+    }
+
     public Long getId() {
         return id;
     }

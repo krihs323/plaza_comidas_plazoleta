@@ -20,7 +20,7 @@ public class MenuUserCase implements IMenuServicePort {
     private final IRestaurantPersistencePort restaurantPersistencePort;
     private final ICategoryPersistencePort categoryPersistencePort;
 
-    //TODO remover
+    //TODO
     private final IUserPersistencePort userPersistencePort;
 
     public MenuUserCase(IMenuPersistencePort menuPersistencePort, IRestaurantPersistencePort restaurantPersistencePort, IUserPersistencePort userPersistencePort, ICategoryPersistencePort categoryPersistencePort) {
