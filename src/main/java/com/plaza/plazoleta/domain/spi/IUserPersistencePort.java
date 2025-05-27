@@ -4,5 +4,5 @@ import com.plaza.plazoleta.domain.model.User;
 
 public interface IUserPersistencePort {
 
-    User getById(Long id);
+    User getById(Long id, String authentizationHeader);
 }

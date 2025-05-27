@@ -13,8 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping(path = "api/plazoleta/restaurant")
-//@RequiredArgsConstructor
+@RequestMapping(path = "/api/plazoleta/restaurant")
 public class RestaurantRestController {
 
     private final IRestaurantHandler restaurantHandler;

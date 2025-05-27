@@ -2,20 +2,20 @@ package com.plaza.plazoleta.domain.model;
 
 public class User {
 
-    private Integer rol;
+    private String rol;
 
     public User() {
     }
 
-    public User(Integer rol) {
+    public User(String rol) {
         this.rol = rol;
     }
 
-    public Integer getRol() {
+    public String getRol() {
         return rol;
     }
 
-    public void setRol(Integer rol) {
+    public void setRol(String rol) {
         this.rol = rol;
     }
 }

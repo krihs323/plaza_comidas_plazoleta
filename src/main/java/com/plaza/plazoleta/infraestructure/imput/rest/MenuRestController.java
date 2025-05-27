@@ -16,8 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping(path = "api/plazoleta/menu")
-//@RequiredArgsConstructor
+@RequestMapping(path = "/api/plazoleta/menu")
 public class MenuRestController {
 
     private final IMenuHandler menuHandler;

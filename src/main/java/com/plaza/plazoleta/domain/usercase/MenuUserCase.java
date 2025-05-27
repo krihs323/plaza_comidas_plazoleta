@@ -10,6 +10,7 @@ import com.plaza.plazoleta.domain.spi.IMenuPersistencePort;
 import com.plaza.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.plaza.plazoleta.domain.spi.IUserPersistencePort;
 import com.plaza.plazoleta.infraestructure.exception.MenuValidationException;
+import com.plaza.plazoleta.infraestructure.exceptionhandler.ExceptionResponse;
 //import com.plaza.plazoleta.infraestructure.exception.MenuValidationException;
 
 import java.util.Optional;
@@ -40,7 +41,7 @@ public class MenuUserCase implements IMenuServicePort {
 
         //TODO Aqui debe reemplazar con el id del usuario autenticado
         if (idUsuarioSistema != restaurant.getUserId()) {
-            throw new MenuValidationException("El id del usuario no corresponde al propietario del restaurante");
+            throw new MenuValidationException(ExceptionResponse.MENU_VALIDATION_USER_NOT_VALID.getMessage());
         }
         menuPersistencePort.saveMenu(menu);
     }
