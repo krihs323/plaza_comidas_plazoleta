@@ -24,4 +24,9 @@ public class UserClientAdapter implements IUserPersistencePort {
         return userEntityMapper.toUser(userFeignClient.getById(id, authentizationHeader));
 
     }
+
+    @Override
+    public User getByEmail(String mail, String authentizationHeader) {
+        return userEntityMapper.toUser(userFeignClient.getByEmail(mail, authentizationHeader));
+    }
 }

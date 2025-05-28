@@ -30,12 +30,16 @@ public class MenuEntity {
     @Column(name = "url_logo")
     private String urlLogo;
 
-    @Column(name = "id_categoria")
-    private Integer categoryId;
+    @ManyToOne
+    @JoinColumn(name = "id_categoria")
+    private CategoryEntity categoryEntity;
 
-    //@ManyToOne
-    //@JoinColumn(name = "id_restaurante")
-    //private RestaurantEntity restaurantEntity;
-    @Column(name = "id_restaurante")
-    private Integer restaurantId;
+    @ManyToOne
+    @JoinColumn(name = "id_restaurante")
+    private RestaurantEntity restaurantEntity;
+
+    @Column(name = "activo")
+    private Boolean active;
+
+
 }

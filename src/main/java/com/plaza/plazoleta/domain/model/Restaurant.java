@@ -1,13 +1,9 @@
 package com.plaza.plazoleta.domain.model;
 
-import com.plaza.plazoleta.infraestructure.exception.RestaurantValidationException;
-import com.plaza.plazoleta.infraestructure.output.jpa.entity.RolType;
-
-import java.time.LocalDate;
-import java.time.Period;
 
 public class Restaurant {
 
+    private Long id;
     private String name;
     private Long numberId;
     private String address;
@@ -15,13 +11,25 @@ public class Restaurant {
     private String urlLogo;
     private Long userId;
 
-    public Restaurant(String name, Long numberId, String address, String phoneNumber, String urlLogo, Long userId) {
+    public Restaurant(Long id, String name, Long numberId, String address, String phoneNumber, String urlLogo, Long userId) {
+        this.id = id;
         this.name = name;
         this.numberId = numberId;
         this.address = address;
         this.phoneNumber = phoneNumber;
         this.urlLogo = urlLogo;
         this.userId = userId;
+    }
+
+    public Restaurant() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -71,4 +79,6 @@ public class Restaurant {
     public void setUserId(Long userId) {
         this.userId = userId;
     }
+
+
 }

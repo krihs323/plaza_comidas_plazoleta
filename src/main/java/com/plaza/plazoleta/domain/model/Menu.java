@@ -2,6 +2,8 @@ package com.plaza.plazoleta.domain.model;
 
 public class Menu {
 
+    private Long id;
+
     private String name;
 
     private Long price;
@@ -10,17 +12,33 @@ public class Menu {
 
     private String urlLogo;
 
-    private Long categoryId;
+    private Category category;
 
-    private Long restaurantId;
+    private Restaurant restaurant;
 
-    public Menu(String name, Long price, String description, String urlLogo, Long categoriId, Long restaurantId) {
+    private Boolean active;
+
+    public Menu() {
+    }
+
+    public Menu(Long id, String name, Long price, String description, String urlLogo, Category category, Restaurant restaurant, Boolean active) {
+        this.id = id;
         this.name = name;
         this.price = price;
         this.description = description;
         this.urlLogo = urlLogo;
-        this.categoryId = categoriId;
-        this.restaurantId = restaurantId;
+        this.category = category;
+        this.restaurant = restaurant;
+        this.active = active == null || active;
+    }
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -55,19 +73,29 @@ public class Menu {
         this.urlLogo = urlLogo;
     }
 
-    public Long getCategoryId() {
-        return categoryId;
+    public Category getCategory() {
+        return category;
     }
 
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
-    public Long getRestaurantId() {
-        return restaurantId;
+    public Restaurant getRestaurant() {
+        return restaurant;
     }
 
-    public void setRestaurantId(Long restaurantId) {
-        this.restaurantId = restaurantId;
+    public void setRestaurant(Restaurant restaurant) {
+        this.restaurant = restaurant;
     }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+
 }

@@ -4,6 +4,16 @@ public class UserEntity {
 
     private String rol;
 
+    private Long idUser;
+
+    public Long getIdUser() {
+        return idUser;
+    }
+
+    public void setIdUser(Long idUser) {
+        this.idUser = idUser;
+    }
+
     public String getRol() {
         return rol;
     }

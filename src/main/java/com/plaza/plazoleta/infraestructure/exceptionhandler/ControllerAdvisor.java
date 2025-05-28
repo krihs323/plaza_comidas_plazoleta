@@ -1,7 +1,6 @@
 package com.plaza.plazoleta.infraestructure.exceptionhandler;
 
 import com.plaza.plazoleta.infraestructure.exception.MenuValidationException;
-import com.plaza.plazoleta.infraestructure.exception.RestaurantAlreadyExistException;
 import com.plaza.plazoleta.infraestructure.exception.RestaurantValidationException;
 import feign.FeignException;
 import org.springframework.http.HttpStatus;
@@ -48,12 +47,6 @@ public class ControllerAdvisor {
                 .body(Collections.singletonMap(MESSAGE, ex.getMessage()));
     }
 
-    @ExceptionHandler(RestaurantAlreadyExistException.class)
-    public ResponseEntity<Map<String, String>> handlerRestaurantAlreadyexception(
-            RestaurantAlreadyExistException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(Collections.singletonMap(MESSAGE, ex.getMessage()));
-    }
 
     @ExceptionHandler(FeignException.class)
     public ResponseEntity<Map<String, String>> handlerFeignexception(
