@@ -201,7 +201,6 @@ class MenuUserCaseTest {
 
     @DisplayName("Should not create when user is not the restaurants owner")
     @Test
-
     void validationUpdateWhenIdUserIsNotOwner() {
 
         Menu menu = getMenu();
@@ -216,8 +215,8 @@ class MenuUserCaseTest {
         String token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiT1dORVIiLCJzdWIiOiJvd25lckBob3RtYWlsLmNvbSIsImlhdCI6MTc0ODM5NjI4MCwiZXhwIjoxNzQ4Mzk3NzIwfQ.fqP_Uaelc2vOF448POHVqHb6F3UVzmIImt9ZQEZd1cc";
 
 
-        Mockito.when(userPersistencePort.getByEmail(anyString(),anyString())).thenReturn(userMock);
         Mockito.when(restaurantPersistencePort.getRestaurantById(anyLong())).thenReturn(menu.getRestaurant());
+        Mockito.when(userPersistencePort.getByEmail(anyString(),anyString())).thenReturn(userMock);
         Mockito.when(httpServletRequest.getHeader("Authorization")).thenReturn(token);
         Mockito.when(jwtService.extractUsername(anyString())).thenReturn("owner@hotmail.com");
 
@@ -233,6 +232,62 @@ class MenuUserCaseTest {
         assertEquals(ExceptionResponse.MENU_VALIATION_OWNER.getMessage(), exception.getMessage());
 
     }
+
+    //HU07
+    @DisplayName("Should disable a menu")
+    @Test
+    void disableMenu(){
+
+        Menu menu = getMenu();
+        menu.getRestaurant().setUserId(9L);
+        Optional<Menu> menuFound = Optional.of(menu);
+
+        User userMock = new User();
+        userMock.setIdUser(9L);
+        userMock.setRol("OWNER");
+        String token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiT1dORVIiLCJzdWIiOiJvd25lckBob3RtYWlsLmNvbSIsImlhdCI6MTc0ODM5NjI4MCwiZXhwIjoxNzQ4Mzk3NzIwfQ.fqP_Uaelc2vOF448POHVqHb6F3UVzmIImt9ZQEZd1cc";
+
+        Mockito.when(menuPersistencePort.findById(anyLong())).thenReturn(menuFound);
+        Mockito.when(userPersistencePort.getByEmail(anyString(),anyString())).thenReturn(userMock);
+        Mockito.when(httpServletRequest.getHeader("Authorization")).thenReturn(token);
+        Mockito.when(jwtService.extractUsername(anyString())).thenReturn("owner@hotmail.com");
+
+        doNothing().when(menuPersistencePort).updateMenu(anyLong(), any());
+
+        menuUserCase.disableMenu(1L, menu);
+
+        verify(menuPersistencePort).updateMenu(1L, menu);
+    }
+
+    @DisplayName("Should not disabled or enable a menu when user is not the restaurants owner")
+    @Test
+    void disableMenuValidationException(){
+
+        Menu menu = getMenu();
+        menu.getRestaurant().setUserId(22L);
+        Optional<Menu> menuFound = Optional.of(menu);
+
+        User userMock = new User();
+        userMock.setIdUser(1L);
+        userMock.setRol("OWNER");
+        String token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiT1dORVIiLCJzdWIiOiJvd25lckBob3RtYWlsLmNvbSIsImlhdCI6MTc0ODM5NjI4MCwiZXhwIjoxNzQ4Mzk3NzIwfQ.fqP_Uaelc2vOF448POHVqHb6F3UVzmIImt9ZQEZd1cc";
+
+        Mockito.when(menuPersistencePort.findById(anyLong())).thenReturn(menuFound);
+        Mockito.when(userPersistencePort.getByEmail(anyString(),anyString())).thenReturn(userMock);
+        Mockito.when(httpServletRequest.getHeader("Authorization")).thenReturn(token);
+        Mockito.when(jwtService.extractUsername(anyString())).thenReturn("owner@hotmail.com");
+
+        doNothing().when(menuPersistencePort).updateMenu(anyLong(), any());
+
+
+
+        MenuValidationException exception = assertThrows(MenuValidationException.class, () ->
+            menuUserCase.disableMenu(1L, menu));
+
+        assertEquals(ExceptionResponse.MENU_VALIATION_OWNER.getMessage(), exception.getMessage());
+
+    }
+
 
 
 
