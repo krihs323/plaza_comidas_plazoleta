@@ -97,5 +97,4 @@ public class Menu {
         this.active = active;
     }
 
-
 }

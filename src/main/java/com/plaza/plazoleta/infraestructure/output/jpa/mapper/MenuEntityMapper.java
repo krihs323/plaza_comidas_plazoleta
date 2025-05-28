@@ -15,6 +15,7 @@ public interface MenuEntityMapper {
     @Mapping(source = "category", target = "categoryEntity")
     MenuEntity toEntity(Menu menu);
 
+
     Menu toMenu(MenuEntity menuEntity);
 
 }

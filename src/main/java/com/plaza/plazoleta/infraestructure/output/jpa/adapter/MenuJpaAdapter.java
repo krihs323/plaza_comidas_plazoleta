@@ -32,7 +32,6 @@ public class MenuJpaAdapter implements IMenuPersistencePort {
 
     @Override
     public Optional<Menu> findById(Long id) {
-
         Optional<MenuEntity> menuEntity = menuRepository.findById(id);
         return Optional.ofNullable(menuEntityMapper.toMenu(menuEntity.orElseThrow(() -> new MenuNotFoundException("No se encontró el Plato que intenta modificar"))));
 

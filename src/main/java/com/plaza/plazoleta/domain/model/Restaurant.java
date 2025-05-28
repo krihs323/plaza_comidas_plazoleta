@@ -80,5 +80,5 @@ public class Restaurant {
         this.userId = userId;
     }
 
-
 }
+

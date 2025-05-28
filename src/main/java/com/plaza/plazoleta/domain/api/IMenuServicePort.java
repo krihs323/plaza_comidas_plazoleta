@@ -1,5 +1,6 @@
 package com.plaza.plazoleta.domain.api;
 
+import com.plaza.plazoleta.application.dto.MenuRequest;
 import com.plaza.plazoleta.domain.model.Menu;
 
 public interface IMenuServicePort {

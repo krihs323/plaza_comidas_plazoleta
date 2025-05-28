@@ -39,12 +39,14 @@ public class BeanConfiguration {
 
     private final HttpServletRequest httpServletRequest;
 
+
     private final ICategoryRepository categoryRepository;
     private final CategoryEntityMapper categoryEntityMapper;
 
     private final JwtService jwtService;
 
     public BeanConfiguration(IRestaurantRepository restaurantRepository, RestaurantEntityMapper restaurantEntityMapper, IUserFeignClient userFeignClient, UserEntityMapper userEntityMapper, IMenuRepository menuRepository, MenuEntityMapper menuEntityMapper, HttpServletRequest httpServletRequest, ICategoryRepository categoryRepository, CategoryEntityMapper categoryEntityMapper, JwtService jwtService) {
+
         this.restaurantRepository = restaurantRepository;
         this.restaurantEntityMapper = restaurantEntityMapper;
         this.userFeignClient = userFeignClient;
@@ -55,6 +57,7 @@ public class BeanConfiguration {
         this.categoryRepository = categoryRepository;
         this.categoryEntityMapper = categoryEntityMapper;
         this.jwtService = jwtService;
+
     }
 
     @Bean
@@ -85,6 +88,7 @@ public class BeanConfiguration {
     @Bean
     public IMenuServicePort menuServicePort(){
         return new MenuUserCase(menuPersistencePort(), restaurantPersistencePort(), userPersistencePort(), categoryPersistencePort(), httpServletRequest, jwtService);
+
     }
 
 }

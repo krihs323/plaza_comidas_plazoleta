@@ -41,5 +41,5 @@ public class MenuEntity {
     @Column(name = "activo")
     private Boolean active;
 
-
 }
+

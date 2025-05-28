@@ -21,5 +21,5 @@ public class CategoryEntity {
     @Column(name = "descripcion")
     private String name;
 
-
 }
+

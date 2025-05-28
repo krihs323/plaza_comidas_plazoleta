@@ -11,6 +11,7 @@ import com.plaza.plazoleta.infraestructure.exceptionhandler.ExceptionResponse;
 import com.plaza.plazoleta.infraestructure.security.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 
+
 import java.util.Optional;
 
 public class RestaurantUserCase implements IRestaurantServicePort {
@@ -36,6 +37,7 @@ public class RestaurantUserCase implements IRestaurantServicePort {
         Optional<User> rolByUserId = Optional.of(userPersistencePort.getById(restaurant.getUserId(), authorizationHeader));
         if (!rolByUserId.get().getRol().equals(Role.OWNER.toString())) {
             throw new RestaurantValidationException(ExceptionResponse.MENU_VALIATION.getMessage());
+
         }
         restaurantPersistencePort.saveRestaurant(restaurant);
     }

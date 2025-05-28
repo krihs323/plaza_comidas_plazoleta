@@ -48,6 +48,7 @@ public class ControllerAdvisor {
     }
 
 
+
     @ExceptionHandler(FeignException.class)
     public ResponseEntity<Map<String, String>> handlerFeignexception(
             FeignException ex) {

@@ -12,6 +12,7 @@ import com.plaza.plazoleta.infraestructure.exception.MenuValidationException;
 import com.plaza.plazoleta.infraestructure.exceptionhandler.ExceptionResponse;
 import com.plaza.plazoleta.infraestructure.security.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
+
 //import com.plaza.plazoleta.infraestructure.exception.MenuValidationException;
 
 import java.util.Optional;
@@ -24,16 +25,19 @@ public class MenuUserCase implements IMenuServicePort {
     private final HttpServletRequest httpServletRequest;
     private final JwtService jwtService;
 
+
     //TODO
     private final IUserPersistencePort userPersistencePort;
 
     public MenuUserCase(IMenuPersistencePort menuPersistencePort, IRestaurantPersistencePort restaurantPersistencePort, IUserPersistencePort userPersistencePort, ICategoryPersistencePort categoryPersistencePort, HttpServletRequest httpServletRequest, JwtService jwtService) {
+
         this.menuPersistencePort = menuPersistencePort;
         this.restaurantPersistencePort = restaurantPersistencePort;
         this.userPersistencePort = userPersistencePort;
         this.categoryPersistencePort = categoryPersistencePort;
         this.httpServletRequest = httpServletRequest;
         this.jwtService = jwtService;
+
     }
 
     private Long getIdUserLog(Menu menu) {
@@ -60,6 +64,7 @@ public class MenuUserCase implements IMenuServicePort {
         //TODO Aqui debe reemplazar con el id del usuario autenticado
         if (getIdUserLog != restaurant.getUserId()) {
             throw new MenuValidationException(ExceptionResponse.MENU_VALIATION_OWNER.getMessage());
+
         }
 
         menuPersistencePort.saveMenu(menu);
@@ -75,6 +80,7 @@ public class MenuUserCase implements IMenuServicePort {
         //TODO Aqui debe reemplazar con el id del usuario autenticado
         if (getIdUserLog != restaurant.getUserId()) {
             throw new MenuValidationException(ExceptionResponse.MENU_VALIATION_OWNER.getMessage());
+
         }
 
         Optional<Menu> menuFound = menuPersistencePort.findById(id);

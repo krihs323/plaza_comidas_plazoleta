@@ -15,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -53,6 +52,7 @@ class RestaurantUserCaseTest {
 
         Mockito.when(httpServletRequest.getHeader(anyString())).thenReturn("Bearer");
 
+
         restaurantUserCase.saveRestaurant(restaurant);
 
         verify(restaurantPersistencePort).saveRestaurant(any());
@@ -65,6 +65,7 @@ class RestaurantUserCaseTest {
         User user = new User();
         user.setRol(Role.ADMIN.toString());
 
+
         Restaurant restaurant = new Restaurant();
         restaurant.setUserId(2L);
 
@@ -72,10 +73,10 @@ class RestaurantUserCaseTest {
 
         Mockito.when(httpServletRequest.getHeader(anyString())).thenReturn("Bearer");
 
-
         RestaurantValidationException exception = assertThrows(RestaurantValidationException.class, () ->
                 restaurantUserCase.saveRestaurant(restaurant));
         assertEquals(ExceptionResponse.MENU_VALIATION.getMessage(), exception.getMessage());
+
 
     }
 }

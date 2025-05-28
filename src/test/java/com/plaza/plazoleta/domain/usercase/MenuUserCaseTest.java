@@ -12,6 +12,7 @@ import com.plaza.plazoleta.infraestructure.exception.MenuValidationException;
 import com.plaza.plazoleta.infraestructure.exceptionhandler.ExceptionResponse;
 import com.plaza.plazoleta.infraestructure.security.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,7 @@ class MenuUserCaseTest {
     @Mock
     private JwtService jwtService;
 
+
     @InjectMocks
     private MenuUserCase menuUserCase;
 
@@ -53,6 +55,7 @@ class MenuUserCaseTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
+
 
 
     private static Menu getMenu() {
@@ -70,6 +73,7 @@ class MenuUserCaseTest {
 
         //Objeto restaurante
         Long idRestaurante = 20L;
+
         String nameRestaurant = "El Forno";
         Long numberId = 31309170L;
         String address = "Avenida 1 calle 2";
@@ -77,6 +81,7 @@ class MenuUserCaseTest {
         String urlLogoRestaurant="urlLogoRestaurant";
 
         Long userId = 9L;
+
         Restaurant restaurant = new Restaurant(idRestaurante, nameRestaurant, numberId, address, phoneNumber, urlLogoRestaurant, userId);
         //Finaliza objeto restaurante
         Boolean active = true;
@@ -93,6 +98,7 @@ class MenuUserCaseTest {
 
 
         return menu;
+
 
     }
 
@@ -112,6 +118,7 @@ class MenuUserCaseTest {
         Mockito.when(restaurantPersistencePort.getRestaurantById(anyLong())).thenReturn(menu.getRestaurant());
         Mockito.when(httpServletRequest.getHeader("Authorization")).thenReturn(token);
         Mockito.when(jwtService.extractUsername(anyString())).thenReturn("owner@hotmail.com");
+
 
         doNothing().when(menuPersistencePort).saveMenu(any());
 
@@ -143,6 +150,7 @@ class MenuUserCaseTest {
         userMock.setIdUser(9L);
         userMock.setRol("OWNER");
         String token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiT1dORVIiLCJzdWIiOiJvd25lckBob3RtYWlsLmNvbSIsImlhdCI6MTc0ODM5NjI4MCwiZXhwIjoxNzQ4Mzk3NzIwfQ.fqP_Uaelc2vOF448POHVqHb6F3UVzmIImt9ZQEZd1cc";
+
 
         Optional<Menu> menuFound = Optional.of(menu);
         Category categoryNew = new Category(2L, "prueba");
@@ -193,6 +201,7 @@ class MenuUserCaseTest {
 
     @DisplayName("Should not create when user is not the restaurants owner")
     @Test
+
     void validationUpdateWhenIdUserIsNotOwner() {
 
         Menu menu = getMenu();
@@ -211,6 +220,7 @@ class MenuUserCaseTest {
         Mockito.when(restaurantPersistencePort.getRestaurantById(anyLong())).thenReturn(menu.getRestaurant());
         Mockito.when(httpServletRequest.getHeader("Authorization")).thenReturn(token);
         Mockito.when(jwtService.extractUsername(anyString())).thenReturn("owner@hotmail.com");
+
         Mockito.when(menuPersistencePort.findById(anyLong())).thenReturn(menuFound);
         Mockito.when(categoryPersistencePort.getCategoryById(anyLong())).thenReturn(categoryNew);
 
@@ -221,7 +231,6 @@ class MenuUserCaseTest {
         });
 
         assertEquals(ExceptionResponse.MENU_VALIATION_OWNER.getMessage(), exception.getMessage());
-
 
     }
 
