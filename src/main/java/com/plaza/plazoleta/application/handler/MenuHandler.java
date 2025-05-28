@@ -1,5 +1,6 @@
 package com.plaza.plazoleta.application.handler;
 
+import com.plaza.plazoleta.application.dto.MenuDisableRequest;
 import com.plaza.plazoleta.application.dto.MenuRequest;
 import com.plaza.plazoleta.application.mapper.MenuRequestMapper;
 import com.plaza.plazoleta.domain.api.IMenuServicePort;
@@ -31,5 +32,11 @@ public class MenuHandler implements IMenuHandler {
     public void updateMenu(Long id, MenuRequest menuRequest) {
         Menu menu = menuRequestMapper.toMenu(menuRequest);
         menuServicePort.updateMenu(id, menu);
+    }
+
+    @Override
+    public void disableMenu(Long id, MenuDisableRequest menuDisableRequest) {
+        Menu menu = menuRequestMapper.toMenu(menuDisableRequest);
+        menuServicePort.disableMenu(id, menu);
     }
 }

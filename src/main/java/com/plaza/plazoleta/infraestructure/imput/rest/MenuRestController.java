@@ -1,5 +1,6 @@
 package com.plaza.plazoleta.infraestructure.imput.rest;
 
+import com.plaza.plazoleta.application.dto.MenuDisableRequest;
 import com.plaza.plazoleta.application.dto.MenuRequest;
 import com.plaza.plazoleta.application.handler.IMenuHandler;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,6 +45,17 @@ public class MenuRestController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateMenu(@Parameter(description = "Id of the menu to be updated") @PathVariable Long id, @RequestBody @Valid MenuRequest menuRequest) {
         menuHandler.updateMenu(id, menuRequest);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @Operation(summary = "Enable anm Disable menu")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Menu updated", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Menu already exists", content = @Content)
+    })
+    @PutMapping("/disable/{id}")
+    public ResponseEntity<?> disableMenu(@Parameter(description = "Id of the menu to be updated") @PathVariable Long id, @RequestBody @Valid MenuDisableRequest menuRequest) {
+        menuHandler.disableMenu(id, menuRequest);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

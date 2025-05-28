@@ -1,5 +1,6 @@
 package com.plaza.plazoleta.application.mapper;
 
+import com.plaza.plazoleta.application.dto.MenuDisableRequest;
 import com.plaza.plazoleta.application.dto.MenuRequest;
 import com.plaza.plazoleta.domain.model.Menu;
 import com.plaza.plazoleta.domain.model.Restaurant;
@@ -15,11 +16,12 @@ public interface MenuRequestMapper {
 
     @Mapping(source = "menuRequest.restaurantId", target = "restaurant.id")
     @Mapping(source = "menuRequest.categoriId", target = "category.id")
-
     Menu toMenu(MenuRequest menuRequest);
 
     @Mapping(source = "menuRequest.restaurantId", target = "id")
     Restaurant toRestaurant(MenuRequest menuRequest);
 
+
+    Menu toMenu(MenuDisableRequest menuDisableRequest);
 
 }

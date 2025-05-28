@@ -11,4 +11,5 @@ public interface IMenuPersistencePort {
     void updateMenu(Long id, Menu menu);
 
     Optional<Menu> findById(Long id);
+
 }

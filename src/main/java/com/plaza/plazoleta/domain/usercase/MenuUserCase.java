@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 //import com.plaza.plazoleta.infraestructure.exception.MenuValidationException;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class MenuUserCase implements IMenuServicePort {
@@ -40,7 +41,7 @@ public class MenuUserCase implements IMenuServicePort {
 
     }
 
-    private Long getIdUserLog(Menu menu) {
+    private Long getIdUserLog() {
 
         String authorizationHeader = httpServletRequest.getHeader("Authorization");
         String jwtAuthorizationHeader = null;
@@ -58,13 +59,9 @@ public class MenuUserCase implements IMenuServicePort {
     @Override
     public void saveMenu(Menu menu) {
         Restaurant restaurant = restaurantPersistencePort.getRestaurantById(menu.getRestaurant().getId());
-
-        Long getIdUserLog = getIdUserLog(menu);
-
-        //TODO Aqui debe reemplazar con el id del usuario autenticado
+        Long getIdUserLog = getIdUserLog();
         if (getIdUserLog != restaurant.getUserId()) {
             throw new MenuValidationException(ExceptionResponse.MENU_VALIATION_OWNER.getMessage());
-
         }
 
         menuPersistencePort.saveMenu(menu);
@@ -74,13 +71,9 @@ public class MenuUserCase implements IMenuServicePort {
     public void updateMenu(Long id, Menu menu) {
 
         Restaurant restaurant = restaurantPersistencePort.getRestaurantById(menu.getRestaurant().getId());
-
-        Long getIdUserLog = getIdUserLog(menu);
-
-        //TODO Aqui debe reemplazar con el id del usuario autenticado
+        Long getIdUserLog = getIdUserLog();
         if (getIdUserLog != restaurant.getUserId()) {
             throw new MenuValidationException(ExceptionResponse.MENU_VALIATION_OWNER.getMessage());
-
         }
 
         Optional<Menu> menuFound = menuPersistencePort.findById(id);
@@ -90,5 +83,17 @@ public class MenuUserCase implements IMenuServicePort {
         menu.setCategory(category);
 
         menuPersistencePort.updateMenu(id, menu);
+    }
+
+    @Override
+    public void disableMenu(Long id, Menu menu) {
+
+        Optional<Menu> menuFound = menuPersistencePort.findById(id);
+        Long getIdUserLog = getIdUserLog();
+        if (!Objects.equals(getIdUserLog, menuFound.get().getRestaurant().getUserId())) {
+            throw new MenuValidationException(ExceptionResponse.MENU_VALIATION_OWNER.getMessage());
+        }
+        menuFound.get().setActive(menu.getActive());
+        menuPersistencePort.updateMenu(id, menuFound.orElseThrow());
     }
 }

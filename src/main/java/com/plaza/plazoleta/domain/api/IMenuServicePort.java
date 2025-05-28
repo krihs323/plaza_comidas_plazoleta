@@ -8,4 +8,6 @@ public interface IMenuServicePort {
     void saveMenu(Menu menu);
 
     void updateMenu(Long id, Menu menu);
+
+    void disableMenu(Long id, Menu menu);
 }
