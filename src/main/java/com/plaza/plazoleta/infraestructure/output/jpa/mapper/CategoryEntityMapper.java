@@ -15,3 +15,4 @@ public interface CategoryEntityMapper {
     Category toCategory(CategoryEntity categoryEntity);
 
 }
+

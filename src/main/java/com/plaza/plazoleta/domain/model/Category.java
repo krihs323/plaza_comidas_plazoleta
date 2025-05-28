@@ -6,6 +6,11 @@ public class Category {
 
     private String name;
 
+
+    public Category() {
+    }
+
+
     public Category(Long id, String name) {
         this.id = id;
         this.name = name;
@@ -27,11 +32,5 @@ public class Category {
         this.name = name;
     }
 
-    @Override
-    public String toString() {
-        return "Category{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
-    }
+
 }

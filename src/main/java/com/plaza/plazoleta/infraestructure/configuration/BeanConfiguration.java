@@ -20,11 +20,12 @@ import com.plaza.plazoleta.infraestructure.output.jpa.mapper.RestaurantEntityMap
 import com.plaza.plazoleta.infraestructure.output.jpa.repository.ICategoryRepository;
 import com.plaza.plazoleta.infraestructure.output.jpa.repository.IMenuRepository;
 import com.plaza.plazoleta.infraestructure.output.jpa.repository.IRestaurantRepository;
+import com.plaza.plazoleta.infraestructure.security.JwtService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
 
 @Configuration
-//@RequiredArgsConstructor
 public class BeanConfiguration {
 
     private final IRestaurantRepository restaurantRepository;
@@ -36,19 +37,27 @@ public class BeanConfiguration {
     private final IMenuRepository menuRepository;
     private final MenuEntityMapper menuEntityMapper;
 
+    private final HttpServletRequest httpServletRequest;
+
+
     private final ICategoryRepository categoryRepository;
     private final CategoryEntityMapper categoryEntityMapper;
 
+    private final JwtService jwtService;
 
-    public BeanConfiguration(IRestaurantRepository restaurantRepository, RestaurantEntityMapper restaurantEntityMapper, IUserFeignClient userFeignClient, UserEntityMapper userEntityMapper, IMenuRepository menuRepository, MenuEntityMapper menuEntityMapper, ICategoryRepository categoryRepository, CategoryEntityMapper categoryEntityMapper) {
+    public BeanConfiguration(IRestaurantRepository restaurantRepository, RestaurantEntityMapper restaurantEntityMapper, IUserFeignClient userFeignClient, UserEntityMapper userEntityMapper, IMenuRepository menuRepository, MenuEntityMapper menuEntityMapper, HttpServletRequest httpServletRequest, ICategoryRepository categoryRepository, CategoryEntityMapper categoryEntityMapper, JwtService jwtService) {
+
         this.restaurantRepository = restaurantRepository;
         this.restaurantEntityMapper = restaurantEntityMapper;
         this.userFeignClient = userFeignClient;
         this.userEntityMapper = userEntityMapper;
         this.menuRepository = menuRepository;
         this.menuEntityMapper = menuEntityMapper;
+        this.httpServletRequest = httpServletRequest;
         this.categoryRepository = categoryRepository;
         this.categoryEntityMapper = categoryEntityMapper;
+        this.jwtService = jwtService;
+
     }
 
     @Bean
@@ -63,7 +72,7 @@ public class BeanConfiguration {
 
     @Bean
     public IRestaurantServicePort restaurantServicePort(){
-        return new RestaurantUserCase(restaurantPersistencePort(), userPersistencePort());
+        return new RestaurantUserCase(restaurantPersistencePort(), userPersistencePort(), httpServletRequest);
     }
 
     @Bean
@@ -78,7 +87,8 @@ public class BeanConfiguration {
 
     @Bean
     public IMenuServicePort menuServicePort(){
-        return new MenuUserCase(menuPersistencePort(), restaurantPersistencePort(), userPersistencePort(), categoryPersistencePort());
+        return new MenuUserCase(menuPersistencePort(), restaurantPersistencePort(), userPersistencePort(), categoryPersistencePort(), httpServletRequest, jwtService);
+
     }
 
 }

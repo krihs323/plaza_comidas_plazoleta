@@ -18,6 +18,9 @@ public class Menu {
 
     private Boolean active;
 
+    public Menu() {
+    }
+
     public Menu(Long id, String name, Long price, String description, String urlLogo, Category category, Restaurant restaurant, Boolean active) {
         this.id = id;
         this.name = name;
@@ -93,6 +96,5 @@ public class Menu {
     public void setActive(Boolean active) {
         this.active = active;
     }
-
 
 }

@@ -6,3 +6,4 @@ public interface ICategoryPersistencePort {
 
     Category getCategoryById(Long id);
 }
+

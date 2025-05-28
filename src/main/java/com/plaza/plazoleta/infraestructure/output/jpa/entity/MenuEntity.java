@@ -41,18 +41,5 @@ public class MenuEntity {
     @Column(name = "activo")
     private Boolean active;
 
-    //todo remover
-    @Override
-    public String toString() {
-        return "MenuEntity{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", price=" + price +
-                ", description='" + description + '\'' +
-                ", urlLogo='" + urlLogo + '\'' +
-                ", categoryEntity=" + categoryEntity +
-                ", restaurantEntity=" + restaurantEntity +
-                ", active=" + active +
-                '}';
-    }
 }
+

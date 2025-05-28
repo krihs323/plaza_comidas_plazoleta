@@ -21,12 +21,5 @@ public class CategoryEntity {
     @Column(name = "descripcion")
     private String name;
 
-    //todo remover
-    @Override
-    public String toString() {
-        return "CategoryEntity{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
-    }
 }
+

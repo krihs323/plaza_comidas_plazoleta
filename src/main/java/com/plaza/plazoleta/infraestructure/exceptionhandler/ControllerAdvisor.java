@@ -1,6 +1,7 @@
 package com.plaza.plazoleta.infraestructure.exceptionhandler;
 
-import com.plaza.plazoleta.infraestructure.exception.*;
+import com.plaza.plazoleta.infraestructure.exception.MenuValidationException;
+import com.plaza.plazoleta.infraestructure.exception.RestaurantValidationException;
 import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,28 +47,7 @@ public class ControllerAdvisor {
                 .body(Collections.singletonMap(MESSAGE, ex.getMessage()));
     }
 
-    @ExceptionHandler(MenuNotFoundException.class)
-    public ResponseEntity<Map<String, String>> menuValidation(
-            MenuNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Collections.singletonMap(MESSAGE, ex.getMessage()));
-    }
 
-    @ExceptionHandler(CategoryValidationException.class)
-    public ResponseEntity<Map<String, String>> categoryValidation(
-            CategoryValidationException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Collections.singletonMap(MESSAGE, ex.getMessage()));
-    }
-
-
-
-    @ExceptionHandler(RestaurantAlreadyExistException.class)
-    public ResponseEntity<Map<String, String>> handlerRestaurantAlreadyexception(
-            RestaurantAlreadyExistException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(Collections.singletonMap(MESSAGE, ex.getMessage()));
-    }
 
     @ExceptionHandler(FeignException.class)
     public ResponseEntity<Map<String, String>> handlerFeignexception(

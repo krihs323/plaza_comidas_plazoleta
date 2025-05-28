@@ -30,6 +30,27 @@ jacocoTestReport {
 		html.required.set(true)
 		csv.required.set(true)
 	}
+
+	sourceSets.main.java.srcDirs = ['src/main/java']
+
+	classDirectories.setFrom(files(classDirectories.files.collect {
+		fileTree(dir: it,
+				exclude: [
+						'com/plaza/plazoleta/application/**',
+						'com/plaza/plazoleta/domain/api/**',
+						'com/plaza/plazoleta/domain/spi/**',
+						'com/plaza/plazoleta/infraestructure/configuration/**',
+						'com/plaza/plazoleta/infraestructure/exceptionhandler/**',
+						'com/plaza/plazoleta/infraestructure/imput/**',
+						'com/plaza/plazoleta/infraestructure/output/jpa/entity/**',
+						'com/plaza/plazoleta/infraestructure/output/jpa/mapper/**',
+						'com/plaza/plazoleta/infraestructure/output/client/mapper/**',
+						'com/plaza/plazoleta/infraestructure/output/client/entity/**',
+						'com/plaza/plazoleta/infraestructure/security/**',
+						'**/*Config.class',
+						'**/*Application.class'
+				])
+	}))
 }
 
 configurations {
@@ -52,6 +73,11 @@ dependencies {
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0'
 	implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.2.1")
+
+	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'

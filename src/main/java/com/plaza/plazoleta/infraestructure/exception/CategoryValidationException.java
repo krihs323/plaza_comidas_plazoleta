@@ -7,3 +7,4 @@ public class CategoryValidationException extends RuntimeException {
     }
 
 }
+

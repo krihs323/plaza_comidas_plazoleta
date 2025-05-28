@@ -22,5 +22,4 @@ public interface MenuRequestMapper {
     Restaurant toRestaurant(MenuRequest menuRequest);
 
 
-
 }

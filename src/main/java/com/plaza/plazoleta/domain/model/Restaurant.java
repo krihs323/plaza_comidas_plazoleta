@@ -1,10 +1,5 @@
 package com.plaza.plazoleta.domain.model;
 
-import com.plaza.plazoleta.infraestructure.exception.RestaurantValidationException;
-import com.plaza.plazoleta.infraestructure.output.jpa.entity.RolType;
-
-import java.time.LocalDate;
-import java.time.Period;
 
 public class Restaurant {
 
@@ -85,17 +80,5 @@ public class Restaurant {
         this.userId = userId;
     }
 
-
-    @Override
-    public String toString() {
-        return "Restaurant{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", numberId=" + numberId +
-                ", address='" + address + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", urlLogo='" + urlLogo + '\'' +
-                ", userId=" + userId +
-                '}';
-    }
 }
+

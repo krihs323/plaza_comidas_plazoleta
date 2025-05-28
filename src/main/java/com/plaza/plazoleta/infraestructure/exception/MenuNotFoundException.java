@@ -7,3 +7,4 @@ public class MenuNotFoundException extends RuntimeException {
     }
 
 }
+
