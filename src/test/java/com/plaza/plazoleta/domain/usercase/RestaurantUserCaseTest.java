@@ -15,9 +15,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class RestaurantUserCaseTest {
 
@@ -32,6 +42,8 @@ class RestaurantUserCaseTest {
 
     @InjectMocks
     private RestaurantUserCase restaurantUserCase;
+
+
 
     @BeforeEach
     void setUp() {
@@ -48,9 +60,9 @@ class RestaurantUserCaseTest {
         Restaurant restaurant = new Restaurant();
         restaurant.setUserId(2L);
 
-        Mockito.when(userPersistencePort.getById(anyLong(), anyString())).thenReturn(user);
+        when(userPersistencePort.getById(anyLong(), anyString())).thenReturn(user);
 
-        Mockito.when(httpServletRequest.getHeader(anyString())).thenReturn("Bearer");
+        when(httpServletRequest.getHeader(anyString())).thenReturn("Bearer");
 
 
         restaurantUserCase.saveRestaurant(restaurant);
@@ -69,14 +81,35 @@ class RestaurantUserCaseTest {
         Restaurant restaurant = new Restaurant();
         restaurant.setUserId(2L);
 
-        Mockito.when(userPersistencePort.getById(anyLong(), anyString())).thenReturn(user);
+        when(userPersistencePort.getById(anyLong(), anyString())).thenReturn(user);
 
-        Mockito.when(httpServletRequest.getHeader(anyString())).thenReturn("Bearer");
+        when(httpServletRequest.getHeader(anyString())).thenReturn("Bearer");
 
         RestaurantValidationException exception = assertThrows(RestaurantValidationException.class, () ->
                 restaurantUserCase.saveRestaurant(restaurant));
         assertEquals(ExceptionResponse.MENU_VALIATION.getMessage(), exception.getMessage());
 
 
+    }
+
+    //HU 10
+    @DisplayName("Should return all restaurants")
+    @Test
+    void getAllRestaurants() {
+
+        List<Restaurant> testRestaurants = new ArrayList<>();
+        Pageable pageable = PageRequest.of(0,2);
+
+        Restaurant restaurant = new Restaurant();
+        testRestaurants.add(restaurant);
+        testRestaurants.add(restaurant);
+
+        Page<Restaurant> restaurantsPage = new PageImpl<>(testRestaurants, pageable, testRestaurants.size());
+
+        when(restaurantPersistencePort.getAllRestaurants(2)).thenReturn(restaurantsPage);
+
+        Page<Restaurant> restaurantsPageReturn = restaurantUserCase.getAllRestaurants(2);
+
+        assertEquals(2, restaurantsPageReturn.getContent().size());
     }
 }

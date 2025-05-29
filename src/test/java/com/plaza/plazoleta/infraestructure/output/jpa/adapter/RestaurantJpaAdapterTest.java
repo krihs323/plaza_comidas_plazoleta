@@ -8,12 +8,16 @@ import com.plaza.plazoleta.infraestructure.output.jpa.entity.RestaurantEntity;
 import com.plaza.plazoleta.infraestructure.output.jpa.mapper.RestaurantEntityMapper;
 import com.plaza.plazoleta.infraestructure.output.jpa.repository.IRestaurantRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -100,5 +104,34 @@ class RestaurantJpaAdapterTest {
 
         assertEquals(ExceptionResponse.RESTAURANT_VALIDATION_NOT_FOUND.getMessage(), exception.getMessage());
 
+    }
+
+
+    @DisplayName("Should return all restaurants")
+    @Test
+    void getAllRestaurants() {
+
+        List<RestaurantEntity> testRestaurants = new ArrayList<>();
+        Sort sort = Sort.by(Sort.Direction.ASC , "name");
+        Pageable pageable = PageRequest.of(0,2, sort);
+
+        RestaurantEntity restaurantEntityMock = new RestaurantEntity();
+        restaurantEntityMock.setName("Il Forno");
+        restaurantEntityMock.setUrlLogo("http");
+        testRestaurants.add(restaurantEntityMock);
+        testRestaurants.add(restaurantEntityMock);
+
+        Page<RestaurantEntity> restaurantsPage = new PageImpl<>(testRestaurants, pageable, testRestaurants.size());
+
+        Restaurant restaurant = new Restaurant();
+        restaurant.setName("Il Forno");
+        restaurant.setUrlLogo("http");
+
+        when(restaurantRepository.findAll(pageable)).thenReturn(restaurantsPage);
+        when(restaurantEntityMapper.toRestaurant(any())).thenReturn(restaurant);
+
+        Page<Restaurant> restaurantsPageReturn = restaurantJpaAdapter.getAllRestaurants(2);
+
+        assertEquals(2, restaurantsPageReturn.getContent().size());
     }
 }

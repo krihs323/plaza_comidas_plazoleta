@@ -7,6 +7,10 @@ import com.plaza.plazoleta.infraestructure.exceptionhandler.ExceptionResponse;
 import com.plaza.plazoleta.infraestructure.output.jpa.entity.RestaurantEntity;
 import com.plaza.plazoleta.infraestructure.output.jpa.mapper.RestaurantEntityMapper;
 import com.plaza.plazoleta.infraestructure.output.jpa.repository.IRestaurantRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.Optional;
 
@@ -36,6 +40,15 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
         }
         throw new RestaurantValidationException(ExceptionResponse.RESTAURANT_VALIDATION_NOT_FOUND.getMessage());
 
+    }
+
+    @Override
+    public Page<Restaurant> getAllRestaurants(Integer pages) {
+
+        Sort sort = Sort.by(Sort.Direction.ASC , "name");
+        Pageable pageable = PageRequest.of(0, pages, sort);
+        Page<RestaurantEntity> restaurantRepositoryAll = restaurantRepository.findAll(pageable);
+        return restaurantRepositoryAll.map(restaurantEntityMapper::toRestaurant);
     }
 
 

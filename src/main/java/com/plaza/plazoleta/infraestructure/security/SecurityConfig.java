@@ -39,7 +39,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
                         req.requestMatchers(WHITE_LIST_URL).permitAll()
-                                .requestMatchers("/api/plazoleta/restaurant/**").hasRole("ADMIN")
+                                .requestMatchers("/api/plazoleta/restaurant/create/**").hasRole("ADMIN")
+                                .requestMatchers("/api/plazoleta/restaurant/all/**").hasRole("CUSTOMER")
                                 .requestMatchers("/api/plazoleta/menu/**").hasRole("OWNER")
                                 .anyRequest()
                                 .authenticated()
