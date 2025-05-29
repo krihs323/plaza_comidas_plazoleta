@@ -38,7 +38,7 @@ public class RestaurantRestController {
 
     @Operation(summary = "Get all restaurant")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "20", description = "Restaurant All", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Restaurant All", content = @Content),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)
     })
     @GetMapping("/all")

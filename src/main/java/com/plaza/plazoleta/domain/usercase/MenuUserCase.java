@@ -12,6 +12,7 @@ import com.plaza.plazoleta.infraestructure.exception.MenuValidationException;
 import com.plaza.plazoleta.infraestructure.exceptionhandler.ExceptionResponse;
 import com.plaza.plazoleta.infraestructure.security.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.data.domain.Page;
 
 //import com.plaza.plazoleta.infraestructure.exception.MenuValidationException;
 
@@ -95,5 +96,14 @@ public class MenuUserCase implements IMenuServicePort {
         }
         menuFound.get().setActive(menu.getActive());
         menuPersistencePort.updateMenu(id, menuFound.orElseThrow());
+    }
+
+    @Override
+    public Page<Menu> getMenuByRestaurant(Long idRestaurant, String category, int page, int size, String sortBy, String sortDir) {
+        Long idCategory = null;
+        if (!category.isEmpty()) {
+            idCategory = Long.parseLong(category);
+        }
+        return menuPersistencePort.getMenuByRestaurant(idRestaurant, idCategory, page, size, sortBy, sortDir);
     }
 }

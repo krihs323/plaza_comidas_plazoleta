@@ -20,13 +20,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 class MenuUserCaseTest {
 
@@ -51,11 +53,31 @@ class MenuUserCaseTest {
     @InjectMocks
     private MenuUserCase menuUserCase;
 
+    //Setup
+    private Long idRestaurant;
+    private int page;
+    private int size;
+    private String sortBy;
+    private Pageable pageable;
+    private Sort sort;
+
+    private String token;
+
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-    }
 
+        idRestaurant = 1L;
+        page = 0;
+        size = 2;
+        sortBy = "id";
+        sort = Sort.by(Sort.Direction.ASC , sortBy);
+        pageable = PageRequest.of(page, size, sort);
+
+        token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiT1dORVIiLCJzdWIiOiJvd25lckBob3RtYWlsLmNvbSIsImlhdCI6MTc0ODM5NjI4MCwiZXhwIjoxNzQ4Mzk3NzIwfQ.fqP_Uaelc2vOF448POHVqHb6F3UVzmIImt9ZQEZd1cc";
+
+    }
 
 
     private static Menu getMenu() {
@@ -111,14 +133,12 @@ class MenuUserCaseTest {
         User userMock = new User();
         userMock.setIdUser(9L);
         userMock.setRol("OWNER");
-        String token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiT1dORVIiLCJzdWIiOiJvd25lckBob3RtYWlsLmNvbSIsImlhdCI6MTc0ODM5NjI4MCwiZXhwIjoxNzQ4Mzk3NzIwfQ.fqP_Uaelc2vOF448POHVqHb6F3UVzmIImt9ZQEZd1cc";
 
         Mockito.when(userPersistencePort.getByEmail(anyString(),anyString())).thenReturn(userMock);
 
         Mockito.when(restaurantPersistencePort.getRestaurantById(anyLong())).thenReturn(menu.getRestaurant());
         Mockito.when(httpServletRequest.getHeader("Authorization")).thenReturn(token);
         Mockito.when(jwtService.extractUsername(anyString())).thenReturn("owner@hotmail.com");
-
 
         doNothing().when(menuPersistencePort).saveMenu(any());
 
@@ -149,7 +169,6 @@ class MenuUserCaseTest {
         User userMock = new User();
         userMock.setIdUser(9L);
         userMock.setRol("OWNER");
-        String token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiT1dORVIiLCJzdWIiOiJvd25lckBob3RtYWlsLmNvbSIsImlhdCI6MTc0ODM5NjI4MCwiZXhwIjoxNzQ4Mzk3NzIwfQ.fqP_Uaelc2vOF448POHVqHb6F3UVzmIImt9ZQEZd1cc";
 
 
         Optional<Menu> menuFound = Optional.of(menu);
@@ -180,7 +199,6 @@ class MenuUserCaseTest {
         User userMock = new User();
         userMock.setIdUser(9L);
         userMock.setRol("OWNER");
-        String token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiT1dORVIiLCJzdWIiOiJvd25lckBob3RtYWlsLmNvbSIsImlhdCI6MTc0ODM5NjI4MCwiZXhwIjoxNzQ4Mzk3NzIwfQ.fqP_Uaelc2vOF448POHVqHb6F3UVzmIImt9ZQEZd1cc";
 
         Mockito.when(userPersistencePort.getByEmail(anyString(),anyString())).thenReturn(userMock);
         Mockito.when(restaurantPersistencePort.getRestaurantById(anyLong())).thenReturn(menu.getRestaurant());
@@ -212,7 +230,6 @@ class MenuUserCaseTest {
         User userMock = new User();
         userMock.setIdUser(9L);
         userMock.setRol("OWNER");
-        String token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiT1dORVIiLCJzdWIiOiJvd25lckBob3RtYWlsLmNvbSIsImlhdCI6MTc0ODM5NjI4MCwiZXhwIjoxNzQ4Mzk3NzIwfQ.fqP_Uaelc2vOF448POHVqHb6F3UVzmIImt9ZQEZd1cc";
 
 
         Mockito.when(restaurantPersistencePort.getRestaurantById(anyLong())).thenReturn(menu.getRestaurant());
@@ -245,7 +262,6 @@ class MenuUserCaseTest {
         User userMock = new User();
         userMock.setIdUser(9L);
         userMock.setRol("OWNER");
-        String token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiT1dORVIiLCJzdWIiOiJvd25lckBob3RtYWlsLmNvbSIsImlhdCI6MTc0ODM5NjI4MCwiZXhwIjoxNzQ4Mzk3NzIwfQ.fqP_Uaelc2vOF448POHVqHb6F3UVzmIImt9ZQEZd1cc";
 
         Mockito.when(menuPersistencePort.findById(anyLong())).thenReturn(menuFound);
         Mockito.when(userPersistencePort.getByEmail(anyString(),anyString())).thenReturn(userMock);
@@ -270,7 +286,6 @@ class MenuUserCaseTest {
         User userMock = new User();
         userMock.setIdUser(1L);
         userMock.setRol("OWNER");
-        String token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiT1dORVIiLCJzdWIiOiJvd25lckBob3RtYWlsLmNvbSIsImlhdCI6MTc0ODM5NjI4MCwiZXhwIjoxNzQ4Mzk3NzIwfQ.fqP_Uaelc2vOF448POHVqHb6F3UVzmIImt9ZQEZd1cc";
 
         Mockito.when(menuPersistencePort.findById(anyLong())).thenReturn(menuFound);
         Mockito.when(userPersistencePort.getByEmail(anyString(),anyString())).thenReturn(userMock);
@@ -288,7 +303,39 @@ class MenuUserCaseTest {
 
     }
 
+    @DisplayName("Should return menues by restaurant")
+    @Test
+    void getMenuByRestaurant(){
+        Long idCategory = null;
 
+        List<Menu> testMenus = new ArrayList<>();
+        Menu menu = new Menu();
 
+        testMenus.add(menu);
+        testMenus.add(menu);
+
+        Page<Menu> menusPage = new PageImpl<>(testMenus, pageable, testMenus.size());
+        when(menuPersistencePort.getMenuByRestaurant(idRestaurant, idCategory, page, size, sortBy, "")).thenReturn(menusPage);
+        Page<Menu> menuPageReturn = menuUserCase.getMenuByRestaurant(idRestaurant, "", page, size, sortBy, "");
+        assertEquals(2, menuPageReturn.getContent().size());
+    }
+
+    @DisplayName("Should return menues by restaurant and category")
+    @Test
+    void getMenuByRestaurantAndCategory(){
+
+        Long idCategory = 1L;
+
+        List<Menu> testMenus = new ArrayList<>();
+        Menu menu = new Menu();
+        testMenus.add(menu);
+        testMenus.add(menu);
+
+        Page<Menu> menusPage = new PageImpl<>(testMenus, pageable, testMenus.size());
+        when(menuPersistencePort.getMenuByRestaurant(idRestaurant, idCategory, page, size, sortBy, "")).thenReturn(menusPage);
+        Page<Menu> menuPageReturn = menuUserCase.getMenuByRestaurant(idRestaurant, "1", page, size, sortBy, "");
+        assertEquals(2, menuPageReturn.getContent().size());
+
+    }
 
 }
