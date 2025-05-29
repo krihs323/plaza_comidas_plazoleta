@@ -15,13 +15,17 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class MenuJpaAdapterTest {
 
@@ -33,9 +37,24 @@ class MenuJpaAdapterTest {
     @InjectMocks
     private MenuJpaAdapter menuJpaAdapter;
 
+    //Setup
+    private Long idRestaurant;
+    private int page;
+    private int size;
+    private String sortBy;
+    private Pageable pageable;
+    private Sort sort;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        idRestaurant = 1L;
+        page = 0;
+        size = 2;
+        sortBy = "id";
+        sort = Sort.by(Sort.Direction.ASC , sortBy);
+        pageable = PageRequest.of(page, size, sort);
     }
 
     private static Menu getMenu() {
@@ -149,5 +168,57 @@ class MenuJpaAdapterTest {
 
         assertEquals(menuExpected.get().getId(), menuMock.getId());
 
+    }
+
+    @Test
+    void getMenuByRestaurant(){
+
+        List<MenuEntity> testMenus = new ArrayList<>();
+        MenuEntity menuEntityMock = new MenuEntity();
+        menuEntityMock.setName("Pasta");
+        menuEntityMock.setUrlLogo("http");
+        testMenus.add(menuEntityMock);
+        testMenus.add(menuEntityMock);
+
+        Menu menu = new Menu();
+        menu.setName("Pasta");
+        menu.setUrlLogo("http");
+
+        Page<MenuEntity> menusPage = new PageImpl<>(testMenus, pageable, testMenus.size());
+
+        when(menuRepository.findByRestaurantEntityId(idRestaurant, pageable)).thenReturn(menusPage);
+        when(menuEntityMapper.toMenu(any())).thenReturn(menu);
+
+        Page<Menu> menuPageReturn = menuJpaAdapter.getMenuByRestaurant(idRestaurant, null, page, size, sortBy, "");
+
+        assertEquals(2, menuPageReturn.getContent().size());
+
+
+    }
+
+    @Test
+    void getMenuByRestaurantAndCategory(){
+
+        Long idCategory = 1L;
+
+        List<MenuEntity> testMenus = new ArrayList<>();
+        MenuEntity menuEntityMock = new MenuEntity();
+        menuEntityMock.setName("Pasta");
+        menuEntityMock.setUrlLogo("http");
+        testMenus.add(menuEntityMock);
+        testMenus.add(menuEntityMock);
+
+        Menu menu = new Menu();
+        menu.setName("Pasta");
+        menu.setUrlLogo("http");
+
+        Page<MenuEntity> menusPage = new PageImpl<>(testMenus, pageable, testMenus.size());
+
+        when(menuRepository.findByRestaurantEntityIdAndCategoryEntityId(idRestaurant, idCategory, pageable)).thenReturn(menusPage);
+        when(menuEntityMapper.toMenu(any())).thenReturn(menu);
+
+        Page<Menu> menuPageReturn = menuJpaAdapter.getMenuByRestaurant(idRestaurant, idCategory, page, size, sortBy, "");
+
+        assertEquals(2, menuPageReturn.getContent().size());
     }
 }

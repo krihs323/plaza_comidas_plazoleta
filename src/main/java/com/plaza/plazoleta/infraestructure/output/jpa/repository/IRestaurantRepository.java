@@ -7,6 +7,4 @@ import java.util.Optional;
 
 public interface IRestaurantRepository extends JpaRepository<RestaurantEntity, Long> {
 
-    //TODO Borrar
-    //Optional<RestaurantEntity> findByEmail(String email);
 }

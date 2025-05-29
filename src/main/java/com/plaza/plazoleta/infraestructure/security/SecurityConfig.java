@@ -41,6 +41,7 @@ public class SecurityConfig {
                         req.requestMatchers(WHITE_LIST_URL).permitAll()
                                 .requestMatchers("/api/plazoleta/restaurant/create/**").hasRole("ADMIN")
                                 .requestMatchers("/api/plazoleta/restaurant/all/**").hasRole("CUSTOMER")
+                                .requestMatchers("/api/plazoleta/menu/restaurant/**").hasRole("CUSTOMER")
                                 .requestMatchers("/api/plazoleta/menu/**").hasRole("OWNER")
                                 .anyRequest()
                                 .authenticated()
