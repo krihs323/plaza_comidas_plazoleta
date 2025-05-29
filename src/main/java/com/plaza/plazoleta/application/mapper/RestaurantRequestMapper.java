@@ -1,5 +1,6 @@
 package com.plaza.plazoleta.application.mapper;
 
+import com.plaza.plazoleta.application.dto.RestaurantListResponse;
 import com.plaza.plazoleta.application.dto.RestaurantRequest;
 import com.plaza.plazoleta.domain.model.Restaurant;
 import org.mapstruct.Mapper;
@@ -11,5 +12,9 @@ import org.mapstruct.ReportingPolicy;
 public interface RestaurantRequestMapper {
 
     Restaurant toRestaurant(RestaurantRequest restaurantRequest);
+
+
+    RestaurantListResponse toRestaurantListRespones(Restaurant restaurant);
+
 
 }

@@ -10,6 +10,7 @@ import com.plaza.plazoleta.infraestructure.exception.RestaurantValidationExcepti
 import com.plaza.plazoleta.infraestructure.exceptionhandler.ExceptionResponse;
 import com.plaza.plazoleta.infraestructure.security.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.data.domain.Page;
 
 
 import java.util.Optional;
@@ -40,6 +41,12 @@ public class RestaurantUserCase implements IRestaurantServicePort {
 
         }
         restaurantPersistencePort.saveRestaurant(restaurant);
+    }
+
+    @Override
+    public Page<Restaurant> getAllRestaurants(Integer pages) {
+
+        return restaurantPersistencePort.getAllRestaurants(pages);
     }
 
 
