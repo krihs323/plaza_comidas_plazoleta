@@ -4,7 +4,6 @@ import com.plaza.plazoleta.domain.model.Menu;
 import com.plaza.plazoleta.domain.spi.IMenuPersistencePort;
 import com.plaza.plazoleta.infraestructure.exception.MenuNotFoundException;
 import com.plaza.plazoleta.infraestructure.output.jpa.entity.MenuEntity;
-import com.plaza.plazoleta.infraestructure.output.jpa.entity.RestaurantEntity;
 import com.plaza.plazoleta.infraestructure.output.jpa.mapper.MenuEntityMapper;
 import com.plaza.plazoleta.infraestructure.output.jpa.repository.IMenuRepository;
 import org.springframework.data.domain.Page;
