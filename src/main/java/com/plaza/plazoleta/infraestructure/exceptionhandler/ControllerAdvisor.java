@@ -1,6 +1,7 @@
 package com.plaza.plazoleta.infraestructure.exceptionhandler;
 
 import com.plaza.plazoleta.infraestructure.exception.MenuValidationException;
+import com.plaza.plazoleta.infraestructure.exception.OrderValidationException;
 import com.plaza.plazoleta.infraestructure.exception.RestaurantValidationException;
 import feign.FeignException;
 import org.springframework.http.HttpStatus;
@@ -55,6 +56,15 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Collections.singletonMap(MESSAGE, ex.getMessage()));
     }
+
+    @ExceptionHandler(OrderValidationException.class)
+    public ResponseEntity<Map<String, String>> handlerOrderValidationexception(
+            OrderValidationException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Collections.singletonMap(MESSAGE, ex.getMessage()));
+    }
+
+
 
 
 }

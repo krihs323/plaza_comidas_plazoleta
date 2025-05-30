@@ -42,6 +42,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/plazoleta/restaurant/create/**").hasRole("ADMIN")
                                 .requestMatchers("/api/plazoleta/restaurant/all/**").hasRole("CUSTOMER")
                                 .requestMatchers("/api/plazoleta/menu/restaurant/**").hasRole("CUSTOMER")
+                                .requestMatchers("/api/plazoleta/order/**").hasRole("CUSTOMER")
                                 .requestMatchers("/api/plazoleta/menu/**").hasRole("OWNER")
                                 .anyRequest()
                                 .authenticated()
