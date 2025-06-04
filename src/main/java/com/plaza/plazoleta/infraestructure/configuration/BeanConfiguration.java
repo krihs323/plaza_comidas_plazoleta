@@ -8,10 +8,13 @@ import com.plaza.plazoleta.domain.usercase.MenuUserCase;
 import com.plaza.plazoleta.domain.usercase.OrderUserCase;
 import com.plaza.plazoleta.domain.usercase.RestaurantUserCase;
 import com.plaza.plazoleta.infraestructure.output.client.adapter.NotificationClientAdapter;
+import com.plaza.plazoleta.infraestructure.output.client.adapter.TraceabilityClientAdapter;
 import com.plaza.plazoleta.infraestructure.output.client.adapter.UserClientAdapter;
 import com.plaza.plazoleta.infraestructure.output.client.mapper.MessageEntityMapper;
+import com.plaza.plazoleta.infraestructure.output.client.mapper.TraceabilityEntityMapper;
 import com.plaza.plazoleta.infraestructure.output.client.mapper.UserEntityMapper;
 import com.plaza.plazoleta.infraestructure.output.client.repository.INotificationFeignClient;
+import com.plaza.plazoleta.infraestructure.output.client.repository.ITraceabilityFeignClient;
 import com.plaza.plazoleta.infraestructure.output.client.repository.IUserFeignClient;
 import com.plaza.plazoleta.infraestructure.output.jpa.adapter.CategoryJpaAdapter;
 import com.plaza.plazoleta.infraestructure.output.jpa.adapter.MenuJpaAdapter;
@@ -41,7 +44,6 @@ public class BeanConfiguration {
 
     private final HttpServletRequest httpServletRequest;
 
-
     private final ICategoryRepository categoryRepository;
     private final CategoryEntityMapper categoryEntityMapper;
 
@@ -54,8 +56,11 @@ public class BeanConfiguration {
     private final INotificationFeignClient notificationFeignClient;
     private final MessageEntityMapper messageEntityMapper;
 
+    private final ITraceabilityFeignClient traceabilityFeignClient;
+    private final TraceabilityEntityMapper traceabilityEntityMapper;
 
-    public BeanConfiguration(IRestaurantRepository restaurantRepository, RestaurantEntityMapper restaurantEntityMapper, IUserFeignClient userFeignClient, UserEntityMapper userEntityMapper, IMenuRepository menuRepository, MenuEntityMapper menuEntityMapper, HttpServletRequest httpServletRequest, ICategoryRepository categoryRepository, CategoryEntityMapper categoryEntityMapper, JwtService jwtService, IOrderRepository orderRepository, OrderEntityMapper orderEntityMapper, IOrderDetailRepository orderDetailRepository, INotificationFeignClient notificationFeignClient, MessageEntityMapper messageEntityMapper) {
+
+    public BeanConfiguration(IRestaurantRepository restaurantRepository, RestaurantEntityMapper restaurantEntityMapper, IUserFeignClient userFeignClient, UserEntityMapper userEntityMapper, IMenuRepository menuRepository, MenuEntityMapper menuEntityMapper, HttpServletRequest httpServletRequest, ICategoryRepository categoryRepository, CategoryEntityMapper categoryEntityMapper, JwtService jwtService, IOrderRepository orderRepository, OrderEntityMapper orderEntityMapper, IOrderDetailRepository orderDetailRepository, INotificationFeignClient notificationFeignClient, MessageEntityMapper messageEntityMapper, ITraceabilityFeignClient traceabilityFeignClient, TraceabilityEntityMapper traceabilityEntityMapper) {
         this.restaurantRepository = restaurantRepository;
         this.restaurantEntityMapper = restaurantEntityMapper;
         this.userFeignClient = userFeignClient;
@@ -71,6 +76,8 @@ public class BeanConfiguration {
         this.orderDetailRepository = orderDetailRepository;
         this.notificationFeignClient = notificationFeignClient;
         this.messageEntityMapper = messageEntityMapper;
+        this.traceabilityFeignClient = traceabilityFeignClient;
+        this.traceabilityEntityMapper = traceabilityEntityMapper;
     }
 
     @Bean
@@ -115,10 +122,15 @@ public class BeanConfiguration {
         return new OrderJpaAdapter(orderRepository, orderEntityMapper, orderDetailRepository, menuRepository);
     }
 
+    @Bean
+    public ITraceabilityPersistencePort traceabilityPersistencePort(){
+        return new TraceabilityClientAdapter(traceabilityFeignClient, traceabilityEntityMapper, httpServletRequest);
+    }
+
 
     @Bean
     public IOrderServicePort orderServicePort(){
-        return new OrderUserCase(orderPersistencePort(), userPersistencePort(), notificationPersistencePort());
+        return new OrderUserCase(orderPersistencePort(), userPersistencePort(), notificationPersistencePort(), traceabilityPersistencePort());
     }
 
 }
