@@ -1,15 +1,16 @@
 package com.plaza.plazoleta.infraestructure.security;
 
+import com.plaza.plazoleta.domain.model.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
@@ -39,11 +40,16 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
                         req.requestMatchers(WHITE_LIST_URL).permitAll()
-                                .requestMatchers("/api/plazoleta/restaurant/create/**").hasRole("ADMIN")
-                                .requestMatchers("/api/plazoleta/restaurant/all/**").hasRole("CUSTOMER")
-                                .requestMatchers("/api/plazoleta/menu/restaurant/**").hasRole("CUSTOMER")
-                                .requestMatchers("/api/plazoleta/order/**").hasRole("CUSTOMER")
-                                .requestMatchers("/api/plazoleta/menu/**").hasRole("OWNER")
+                                .requestMatchers("/api/plazoleta/restaurant/create/**").hasRole(Role.ADMIN.name())
+                                .requestMatchers("/api/plazoleta/restaurant/all/**").hasRole(Role.CUSTOMER.name())
+                                .requestMatchers("/api/plazoleta/menu/restaurant/**").hasRole(Role.CUSTOMER.name())
+                                .requestMatchers("/api/plazoleta/order/create/**").hasRole(Role.CUSTOMER.name())
+                                .requestMatchers("/api/plazoleta/menu/**").hasRole(Role.OWNER.name())
+                                .requestMatchers("/api/plazoleta/employee/**").hasRole(Role.EMPLOYEE.name())
+                                .requestMatchers("/api/plazoleta/order/toprepare/**").hasRole(Role.EMPLOYEE.name())
+                                .requestMatchers("/api/plazoleta/order/toready/**").hasRole(Role.EMPLOYEE.name())
+                                .requestMatchers("/api/plazoleta/order/todeliver/**").hasRole(Role.EMPLOYEE.name())
+                                .requestMatchers("/api/plazoleta/order/tocancel/**").hasRole(Role.CUSTOMER.name())
                                 .anyRequest()
                                 .authenticated()
                 )
@@ -52,9 +58,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-
-
 
 }
 

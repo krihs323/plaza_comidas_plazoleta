@@ -1,6 +1,7 @@
 package com.plaza.plazoleta.domain.spi;
 
 import com.plaza.plazoleta.domain.model.Menu;
+import com.plaza.plazoleta.domain.model.PageResult;
 import org.springframework.data.domain.Page;
 
 import java.util.Optional;
@@ -13,5 +14,5 @@ public interface IMenuPersistencePort {
 
     Optional<Menu> findById(Long id);
 
-    Page<Menu> getMenuByRestaurant(Long idRestaurant, Long idCategory, int page, int size, String sortBy, String sortDir);
+    PageResult<Menu> getMenuByRestaurant(Long idRestaurant, Long idCategory, int page, int size, String sortBy, String sortDir);
 }

@@ -3,7 +3,7 @@ package com.plaza.plazoleta.infraestructure.output.jpa.adapter;
 import com.plaza.plazoleta.domain.model.Category;
 import com.plaza.plazoleta.domain.spi.ICategoryPersistencePort;
 import com.plaza.plazoleta.infraestructure.exception.CategoryValidationException;
-import com.plaza.plazoleta.infraestructure.exceptionhandler.ExceptionResponse;
+import com.plaza.plazoleta.domain.exception.ExceptionResponse;
 import com.plaza.plazoleta.infraestructure.output.jpa.entity.CategoryEntity;
 import com.plaza.plazoleta.infraestructure.output.jpa.mapper.CategoryEntityMapper;
 import com.plaza.plazoleta.infraestructure.output.jpa.repository.ICategoryRepository;

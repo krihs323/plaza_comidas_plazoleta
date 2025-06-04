@@ -1,8 +1,8 @@
 package com.plaza.plazoleta.infraestructure.exceptionhandler;
 
-import com.plaza.plazoleta.infraestructure.exception.MenuValidationException;
-import com.plaza.plazoleta.infraestructure.exception.OrderValidationException;
-import com.plaza.plazoleta.infraestructure.exception.RestaurantValidationException;
+import com.plaza.plazoleta.domain.exception.MenuValidationException;
+import com.plaza.plazoleta.domain.exception.OrderValidationException;
+import com.plaza.plazoleta.domain.exception.RestaurantValidationException;
 import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

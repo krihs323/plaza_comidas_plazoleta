@@ -1,18 +1,17 @@
 package com.plaza.plazoleta.infraestructure.configuration;
 
 import com.plaza.plazoleta.domain.api.IMenuServicePort;
-import com.plaza.plazoleta.domain.api.IOrderPersistencePort;
+import com.plaza.plazoleta.domain.spi.*;
 import com.plaza.plazoleta.domain.api.IOrderServicePort;
 import com.plaza.plazoleta.domain.api.IRestaurantServicePort;
-import com.plaza.plazoleta.domain.spi.ICategoryPersistencePort;
-import com.plaza.plazoleta.domain.spi.IMenuPersistencePort;
-import com.plaza.plazoleta.domain.spi.IRestaurantPersistencePort;
-import com.plaza.plazoleta.domain.spi.IUserPersistencePort;
 import com.plaza.plazoleta.domain.usercase.MenuUserCase;
 import com.plaza.plazoleta.domain.usercase.OrderUserCase;
 import com.plaza.plazoleta.domain.usercase.RestaurantUserCase;
+import com.plaza.plazoleta.infraestructure.output.client.adapter.NotificationClientAdapter;
 import com.plaza.plazoleta.infraestructure.output.client.adapter.UserClientAdapter;
+import com.plaza.plazoleta.infraestructure.output.client.mapper.MessageEntityMapper;
 import com.plaza.plazoleta.infraestructure.output.client.mapper.UserEntityMapper;
+import com.plaza.plazoleta.infraestructure.output.client.repository.INotificationFeignClient;
 import com.plaza.plazoleta.infraestructure.output.client.repository.IUserFeignClient;
 import com.plaza.plazoleta.infraestructure.output.jpa.adapter.CategoryJpaAdapter;
 import com.plaza.plazoleta.infraestructure.output.jpa.adapter.MenuJpaAdapter;
@@ -52,7 +51,11 @@ public class BeanConfiguration {
     private final OrderEntityMapper orderEntityMapper;
     private final IOrderDetailRepository orderDetailRepository;
 
-    public BeanConfiguration(IRestaurantRepository restaurantRepository, RestaurantEntityMapper restaurantEntityMapper, IUserFeignClient userFeignClient, UserEntityMapper userEntityMapper, IMenuRepository menuRepository, MenuEntityMapper menuEntityMapper, HttpServletRequest httpServletRequest, ICategoryRepository categoryRepository, CategoryEntityMapper categoryEntityMapper, JwtService jwtService, IOrderRepository orderRepository, OrderEntityMapper orderEntityMapper, IOrderDetailRepository orderDetailRepository) {
+    private final INotificationFeignClient notificationFeignClient;
+    private final MessageEntityMapper messageEntityMapper;
+
+
+    public BeanConfiguration(IRestaurantRepository restaurantRepository, RestaurantEntityMapper restaurantEntityMapper, IUserFeignClient userFeignClient, UserEntityMapper userEntityMapper, IMenuRepository menuRepository, MenuEntityMapper menuEntityMapper, HttpServletRequest httpServletRequest, ICategoryRepository categoryRepository, CategoryEntityMapper categoryEntityMapper, JwtService jwtService, IOrderRepository orderRepository, OrderEntityMapper orderEntityMapper, IOrderDetailRepository orderDetailRepository, INotificationFeignClient notificationFeignClient, MessageEntityMapper messageEntityMapper) {
         this.restaurantRepository = restaurantRepository;
         this.restaurantEntityMapper = restaurantEntityMapper;
         this.userFeignClient = userFeignClient;
@@ -66,6 +69,8 @@ public class BeanConfiguration {
         this.orderRepository = orderRepository;
         this.orderEntityMapper = orderEntityMapper;
         this.orderDetailRepository = orderDetailRepository;
+        this.notificationFeignClient = notificationFeignClient;
+        this.messageEntityMapper = messageEntityMapper;
     }
 
     @Bean
@@ -75,12 +80,12 @@ public class BeanConfiguration {
 
     @Bean
     public IUserPersistencePort userPersistencePort(){
-        return new UserClientAdapter(userFeignClient, userEntityMapper);
+        return new UserClientAdapter(userFeignClient, userEntityMapper, httpServletRequest, jwtService);
     }
 
     @Bean
     public IRestaurantServicePort restaurantServicePort(){
-        return new RestaurantUserCase(restaurantPersistencePort(), userPersistencePort(), httpServletRequest);
+        return new RestaurantUserCase(restaurantPersistencePort(), userPersistencePort());
     }
 
     @Bean
@@ -95,8 +100,13 @@ public class BeanConfiguration {
 
     @Bean
     public IMenuServicePort menuServicePort(){
-        return new MenuUserCase(menuPersistencePort(), restaurantPersistencePort(), userPersistencePort(), categoryPersistencePort(), httpServletRequest, jwtService);
+        return new MenuUserCase(menuPersistencePort(), restaurantPersistencePort(), userPersistencePort());
 
+    }
+
+    @Bean
+    public INotificationPersistencePort notificationPersistencePort(){
+        return new NotificationClientAdapter(notificationFeignClient, messageEntityMapper, httpServletRequest);
     }
 
     //Hu11
@@ -105,9 +115,10 @@ public class BeanConfiguration {
         return new OrderJpaAdapter(orderRepository, orderEntityMapper, orderDetailRepository, menuRepository);
     }
 
+
     @Bean
     public IOrderServicePort orderServicePort(){
-        return new OrderUserCase(orderPersistencePort(), httpServletRequest, jwtService, userPersistencePort());
+        return new OrderUserCase(orderPersistencePort(), userPersistencePort(), notificationPersistencePort());
     }
 
 }

@@ -1,10 +1,14 @@
 package com.plaza.plazoleta.infraestructure.security;
 
+import com.plaza.plazoleta.domain.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
+import org.mapstruct.control.MappingControl;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -19,7 +23,8 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    private static final String SECRET_KEY = "e3f1a9c4b8d2e7f6a1b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5\n";
+    @Value("${security.token}")
+    private String token;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -91,7 +96,6 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-
     private Claims extractAllClaims(String token) {
         return Jwts
                 .parserBuilder()
@@ -102,7 +106,7 @@ public class JwtService {
     }
 
     private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = Decoders.BASE64.decode(token);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
@@ -110,4 +114,26 @@ public class JwtService {
         Claims claims = extractAllClaims(token);
         return (String) claims.get("role");
     }
+
+    public User extractUser(String token) {
+        Claims claims = extractAllClaims(token);
+
+        String role = (String) claims.get("role");
+        Integer idUser = (Integer) claims.get("idUuser");
+        Integer idRestaurantEmployee = (Integer) claims.get("idRestaurantEmployee");
+
+        User user = new User();
+        user.setRol(role);
+        if(idUser!=null){
+            user.setIdUser(Long.valueOf(idUser));
+        }
+        if(idRestaurantEmployee!=null){
+            user.setIdRestaurantEmployee(Long.valueOf(idRestaurantEmployee));
+        }
+        return user;
+    }
+
+
+
+
 }

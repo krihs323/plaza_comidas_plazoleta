@@ -4,6 +4,7 @@ import com.plaza.plazoleta.domain.model.User;
 import com.plaza.plazoleta.infraestructure.output.client.entity.UserEntity;
 import com.plaza.plazoleta.infraestructure.output.client.mapper.UserEntityMapper;
 import com.plaza.plazoleta.infraestructure.output.client.repository.IUserFeignClient;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -11,8 +12,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 
 class UserClientAdapterTest {
 
@@ -20,6 +25,9 @@ class UserClientAdapterTest {
     private IUserFeignClient userFeignClient;
     @Mock
     private UserEntityMapper userEntityMapper;
+
+    @Mock
+    private HttpServletRequest httpServletRequest;
 
     @InjectMocks
     private UserClientAdapter userClientAdapter;
@@ -43,8 +51,9 @@ class UserClientAdapterTest {
 
         Mockito.when(userFeignClient.getById(anyLong(), anyString())).thenReturn(userEntity);
         Mockito.when(userEntityMapper.toUser(any())).thenReturn(userMock);
+        Mockito.when(httpServletRequest.getHeader(any())).thenReturn("Authorization");
 
-        User userExpected = userClientAdapter.getById(anyLong(), anyString());
+        User userExpected = userClientAdapter.getById(anyLong());
         assertEquals(userExpected.getIdUser(), userMock.getIdUser());
 
     }
@@ -68,4 +77,6 @@ class UserClientAdapterTest {
         assertEquals(userExpected.getIdUser(), userMock.getIdUser());
 
     }
+
+
 }
