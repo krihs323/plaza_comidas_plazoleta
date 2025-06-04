@@ -5,6 +5,7 @@ import com.plaza.plazoleta.domain.spi.INotificationPersistencePort;
 import com.plaza.plazoleta.domain.spi.IOrderPersistencePort;
 import com.plaza.plazoleta.domain.api.IOrderServicePort;
 import com.plaza.plazoleta.domain.model.*;
+import com.plaza.plazoleta.domain.spi.ITraceabilityPersistencePort;
 import com.plaza.plazoleta.domain.spi.IUserPersistencePort;
 import com.plaza.plazoleta.domain.exception.OrderValidationException;
 import com.plaza.plazoleta.domain.exception.ExceptionResponse;
@@ -19,11 +20,13 @@ public class OrderUserCase implements IOrderServicePort {
     private final IOrderPersistencePort orderPersistencePort;
     private final IUserPersistencePort userPersistencePort;
     private final INotificationPersistencePort notificatoinPersistencePort;
+    private final ITraceabilityPersistencePort traceabilityPersistencePort;
 
-    public OrderUserCase(IOrderPersistencePort orderPersistencePort, IUserPersistencePort userPersistencePort, INotificationPersistencePort notificatoinPersistencePort) {
+    public OrderUserCase(IOrderPersistencePort orderPersistencePort, IUserPersistencePort userPersistencePort, INotificationPersistencePort notificatoinPersistencePort, ITraceabilityPersistencePort traceabilityPersistencePort) {
         this.orderPersistencePort = orderPersistencePort;
         this.userPersistencePort = userPersistencePort;
         this.notificatoinPersistencePort = notificatoinPersistencePort;
+        this.traceabilityPersistencePort = traceabilityPersistencePort;
     }
 
     @Override
@@ -59,9 +62,15 @@ public class OrderUserCase implements IOrderServicePort {
             throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_NOT_FOUND.getMessage());
         }
 
+        Status statusBeore = orderToUpdateStatus.get().getStatus();
+
         orderToUpdateStatus.get().setEmployeeAsignedId(user.getIdUser());
         orderToUpdateStatus.get().setStatus(Status.EN_PREPARACION);
         orderPersistencePort.UpdateStatusOrder(id, orderToUpdateStatus.orElseThrow());
+
+        Traceability traceability = new Traceability(id, orderToUpdateStatus.get().getCustomer().getIdUser(), statusBeore, Status.EN_PREPARACION);
+        traceabilityPersistencePort.insertTraceability(traceability);
+
     }
 
     //HU14
@@ -73,12 +82,16 @@ public class OrderUserCase implements IOrderServicePort {
             throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_NOT_FOUND.getMessage());
         }
 
+        Status statusBeore = orderToUpdateStatus.get().getStatus();
         orderToUpdateStatus.get().setStatus(Status.LISTO);
         orderToUpdateStatus.get().setPin(UUID.randomUUID().toString());
         orderPersistencePort.UpdateStatusOrder(id, orderToUpdateStatus.orElseThrow());
+
         User user = userPersistencePort.getById(orderToUpdateStatus.get().getCustomer().getIdUser());
         Message message = new Message(Constant.MESSAGE_PIN.getValue() + orderToUpdateStatus.get().getPin(), user.getPhoneNumber());
         notificatoinPersistencePort.sendMessage(message);
+        Traceability traceability = new Traceability(id, orderToUpdateStatus.get().getCustomer().getIdUser(), statusBeore, Status.LISTO);
+        traceabilityPersistencePort.insertTraceability(traceability);
 
     }
 
@@ -92,9 +105,13 @@ public class OrderUserCase implements IOrderServicePort {
         if(!orderToUpdateStatus.get().getStatus().equals(Status.LISTO)){
             throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_NOT_IS_READY.getMessage());
         }
+        Status statusBeore = orderToUpdateStatus.get().getStatus();
         orderToUpdateStatus.get().setStatus(Status.ENTREGADO);
         Long id = orderToUpdateStatus.get().getId();
         orderPersistencePort.UpdateStatusOrder(id, orderToUpdateStatus.orElseThrow());
+
+        Traceability traceability = new Traceability(id, orderToUpdateStatus.get().getCustomer().getIdUser(), statusBeore, Status.ENTREGADO);
+        traceabilityPersistencePort.insertTraceability(traceability);
     }
 
     @Override
@@ -111,8 +128,12 @@ public class OrderUserCase implements IOrderServicePort {
 
             throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_NOT_IS_PENDING.getMessage());
         }
+        Status statusBeore = orderToUpdateStatus.get().getStatus();
         orderToUpdateStatus.get().setStatus(Status.CANCELADO);
         orderPersistencePort.UpdateStatusOrder(id, orderToUpdateStatus.orElseThrow());
+
+        Traceability traceability = new Traceability(id, orderToUpdateStatus.get().getCustomer().getIdUser(), statusBeore, Status.CANCELADO);
+        traceabilityPersistencePort.insertTraceability(traceability);
 
     }
 

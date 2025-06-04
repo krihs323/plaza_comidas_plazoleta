@@ -21,9 +21,7 @@ public class NotificationClientAdapter implements INotificationPersistencePort {
 
     @Override
     public void sendMessage(Message message) {
-
         String authorizationHeader = httpServletRequest.getHeader("Authorization");
-
         notificationFeignClient.sendMessage(messageEntityMapper.toMessageEntity(message), authorizationHeader);
 
     }
