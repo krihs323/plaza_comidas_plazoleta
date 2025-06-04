@@ -36,17 +36,4 @@ public class RestaurantEntity {
     @Column(name = "id_usuario")
     private Integer userId;
 
-    //todo remover
-    @Override
-    public String toString() {
-        return "RestaurantEntity{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", numberId=" + numberId +
-                ", address='" + address + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", urlLogo='" + urlLogo + '\'' +
-                ", userId=" + userId +
-                '}';
-    }
 }

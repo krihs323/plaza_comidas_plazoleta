@@ -38,5 +38,11 @@ public class OrderEntity {
     @OneToMany(mappedBy = "orderEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<OrderDetailEntity> details = new ArrayList<>();
 
+    @Column(name = "id_empleado")
+    private Long employeeAsignedId;
+
+    @Column(name = "pin")
+    private String pin;
+
 }
 

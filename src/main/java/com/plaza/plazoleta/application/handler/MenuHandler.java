@@ -3,9 +3,11 @@ package com.plaza.plazoleta.application.handler;
 import com.plaza.plazoleta.application.dto.MenuDisableRequest;
 import com.plaza.plazoleta.application.dto.MenuRequest;
 import com.plaza.plazoleta.application.dto.MenuResponse;
+import com.plaza.plazoleta.application.dto.MenuUpdateRequest;
 import com.plaza.plazoleta.application.mapper.MenuRequestMapper;
 import com.plaza.plazoleta.domain.api.IMenuServicePort;
 import com.plaza.plazoleta.domain.model.Menu;
+import com.plaza.plazoleta.domain.model.PageResult;
 import com.plaza.plazoleta.domain.model.Restaurant;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -31,7 +33,7 @@ public class MenuHandler implements IMenuHandler {
     }
 
     @Override
-    public void updateMenu(Long id, MenuRequest menuRequest) {
+    public void updateMenu(Long id, MenuUpdateRequest menuRequest) {
         Menu menu = menuRequestMapper.toMenu(menuRequest);
         menuServicePort.updateMenu(id, menu);
     }
@@ -43,8 +45,10 @@ public class MenuHandler implements IMenuHandler {
     }
 
     @Override
-    public Page<MenuResponse> getMenuByRestaurant(Long idRestaurant, String idCategory, int page, int size, String sortBy, String sortDir) {
-        Page<Menu> menuList = menuServicePort.getMenuByRestaurant(idRestaurant, idCategory, page, size, sortBy, sortDir);
-        return menuList.map(menuRequestMapper::toMenuListResponse);
+    public PageResult<MenuResponse> getMenuByRestaurant(Long idRestaurant, String idCategory, int page, int size, String sortBy, String sortDir) {
+        PageResult<Menu> menuList = menuServicePort.getMenuByRestaurant(idRestaurant, idCategory, page, size, sortBy, sortDir);
+        //return menuList.map(menuRequestMapper::toMenuListResponse);
+        return menuRequestMapper.toPageResultResponse(menuList);
+
     }
 }

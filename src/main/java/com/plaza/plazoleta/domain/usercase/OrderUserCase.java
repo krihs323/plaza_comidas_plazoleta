@@ -1,75 +1,119 @@
 package com.plaza.plazoleta.domain.usercase;
 
-import com.plaza.plazoleta.domain.api.IOrderPersistencePort;
+import com.plaza.plazoleta.domain.constants.Constant;
+import com.plaza.plazoleta.domain.spi.INotificationPersistencePort;
+import com.plaza.plazoleta.domain.spi.IOrderPersistencePort;
 import com.plaza.plazoleta.domain.api.IOrderServicePort;
 import com.plaza.plazoleta.domain.model.*;
-import com.plaza.plazoleta.domain.spi.ICategoryPersistencePort;
-import com.plaza.plazoleta.domain.spi.IMenuPersistencePort;
-import com.plaza.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.plaza.plazoleta.domain.spi.IUserPersistencePort;
-import com.plaza.plazoleta.infraestructure.exception.MenuValidationException;
-import com.plaza.plazoleta.infraestructure.exception.OrderValidationException;
-import com.plaza.plazoleta.infraestructure.exceptionhandler.ExceptionResponse;
-import com.plaza.plazoleta.infraestructure.security.JwtService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.plaza.plazoleta.domain.exception.OrderValidationException;
+import com.plaza.plazoleta.domain.exception.ExceptionResponse;
+import com.plaza.plazoleta.domain.validation.OrderValidations;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public class OrderUserCase implements IOrderServicePort {
 
     private final IOrderPersistencePort orderPersistencePort;
-    //TODO Validar si son necesarios
-    private final HttpServletRequest httpServletRequest;
-    private final JwtService jwtService;
     private final IUserPersistencePort userPersistencePort;
+    private final INotificationPersistencePort notificatoinPersistencePort;
 
-
-    public OrderUserCase(IOrderPersistencePort orderPersistencePort, HttpServletRequest httpServletRequest, JwtService jwtService, IUserPersistencePort userPersistencePort) {
+    public OrderUserCase(IOrderPersistencePort orderPersistencePort, IUserPersistencePort userPersistencePort, INotificationPersistencePort notificatoinPersistencePort) {
         this.orderPersistencePort = orderPersistencePort;
-        this.httpServletRequest = httpServletRequest;
-        this.jwtService = jwtService;
         this.userPersistencePort = userPersistencePort;
+        this.notificatoinPersistencePort = notificatoinPersistencePort;
     }
 
     @Override
     public void saveOrder(Order order) {
-        //Restaurant restaurant = restaurantPersistencePort.getRestaurantById(menu.getRestaurant().getId());
-       // Long getIdUserLog = getIdUserLog();
-//        if (getIdUserLog != restaurant.getUserId()) {
-//            throw new MenuValidationException(ExceptionResponse.MENU_VALIATION_OWNER.getMessage());
-//        }
-
-        Long getIdUserLog = getIdUserLog();
-
-        //Buscar un pedido diferente a estos estados en_preparacion,pendiente, listo
+        OrderValidations.saveOrder(order);
+        User user = userPersistencePort.getUseAuth();
         List<Status> invalidStatusList = List.of(Status.EN_PREPARACION, Status.PENDIENTE, Status.LISTO);
-        Optional<Order> orderNotAvailable = orderPersistencePort.findByCustomerAndStatusInvalid(getIdUserLog, invalidStatusList);
-        if(orderNotAvailable.isPresent()){
+        Optional<Order> orderNotAvailable = orderPersistencePort.findByCustomerAndStatusInvalid(user.getIdUser(), invalidStatusList);
+        if (orderNotAvailable.isPresent()) {
             throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_NOT_VALID.getMessage());
         }
 
-        //Crea la nueva orden
         order.setStatus(Status.PENDIENTE);
-        User user = new User("",  getIdUserLog);
         order.setCustomer(user);
         orderPersistencePort.saveOrder(order);
-
-        //Despues de crear el pedido, obtiene el id y crea el detalle a partir de la lista de platos
     }
 
-    //Delegar aun servicio
-    private Long getIdUserLog() {
+    @Override
+    public PageResult<Order> getOrderByStatus(String status, int page, int size, String sortBy, String sortDir) {
+        User user = userPersistencePort.getUseAuth();
+        Status statusEnum = Status.valueOf(status);
 
-        String authorizationHeader = httpServletRequest.getHeader("Authorization");
-        String jwtAuthorizationHeader = null;
-        if (authorizationHeader.startsWith("Bearer ")) {
-            jwtAuthorizationHeader = authorizationHeader.substring(7);
+        return orderPersistencePort.getOrderByStatus(user.getIdRestaurantEmployee(), statusEnum, page, size, sortBy, sortDir);
+    }
+
+    //HU13
+    @Override
+    public void updateOrderToPreparation(Long id) {
+        User user = userPersistencePort.getUseAuth();
+
+        Optional<Order> orderToUpdateStatus = orderPersistencePort.finById(id);
+        if (orderToUpdateStatus.isEmpty()){
+            throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_NOT_FOUND.getMessage());
         }
-        String userEmail = jwtService.extractUsername(jwtAuthorizationHeader);
-        User user = userPersistencePort.getByEmail(userEmail, authorizationHeader);
-        Optional<User> rolByUserEmail = Optional.ofNullable(user);
 
-        return rolByUserEmail.orElseThrow().getIdUser();
+        orderToUpdateStatus.get().setEmployeeAsignedId(user.getIdUser());
+        orderToUpdateStatus.get().setStatus(Status.EN_PREPARACION);
+        orderPersistencePort.UpdateStatusOrder(id, orderToUpdateStatus.orElseThrow());
     }
+
+    //HU14
+    @Override
+    public void updateOrderToReady(Long id) {
+
+        Optional<Order> orderToUpdateStatus = orderPersistencePort.finById(id);
+        if (orderToUpdateStatus.isEmpty()){
+            throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_NOT_FOUND.getMessage());
+        }
+
+        orderToUpdateStatus.get().setStatus(Status.LISTO);
+        orderToUpdateStatus.get().setPin(UUID.randomUUID().toString());
+        orderPersistencePort.UpdateStatusOrder(id, orderToUpdateStatus.orElseThrow());
+        User user = userPersistencePort.getById(orderToUpdateStatus.get().getCustomer().getIdUser());
+        Message message = new Message(Constant.MESSAGE_PIN.getValue() + orderToUpdateStatus.get().getPin(), user.getPhoneNumber());
+        notificatoinPersistencePort.sendMessage(message);
+
+    }
+
+    @Override
+    public void updateOrderToDelivered(Order order) {
+
+        Optional<Order> orderToUpdateStatus = orderPersistencePort.finByPin(order.getPin());
+        if (orderToUpdateStatus.isEmpty()){
+            throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_NOT_FOUND.getMessage());
+        }
+        if(!orderToUpdateStatus.get().getStatus().equals(Status.LISTO)){
+            throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_NOT_IS_READY.getMessage());
+        }
+        orderToUpdateStatus.get().setStatus(Status.ENTREGADO);
+        Long id = orderToUpdateStatus.get().getId();
+        orderPersistencePort.UpdateStatusOrder(id, orderToUpdateStatus.orElseThrow());
+    }
+
+    @Override
+    public void updateOrderToCanceled(Long id) {
+
+        Optional<Order> orderToUpdateStatus = orderPersistencePort.finById(id);
+        if (orderToUpdateStatus.isEmpty()){
+            throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_NOT_FOUND.getMessage());
+        }
+        if(!orderToUpdateStatus.get().getStatus().equals(Status.PENDIENTE)){
+            User user = userPersistencePort.getById(orderToUpdateStatus.get().getCustomer().getIdUser());
+            Message message = new Message(Constant.MESSAGE_ORDER_IN_PREPARATION.getValue(), user.getPhoneNumber());
+            notificatoinPersistencePort.sendMessage(message);
+
+            throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_NOT_IS_PENDING.getMessage());
+        }
+        orderToUpdateStatus.get().setStatus(Status.CANCELADO);
+        orderPersistencePort.UpdateStatusOrder(id, orderToUpdateStatus.orElseThrow());
+
+    }
+
 }

@@ -15,12 +15,26 @@ public class Order {
 
     private List<OrderDetail> orderDetailList;
 
-    public Order(Long id, User customer, Restaurant restaurant, Status status, List<OrderDetail> orderDetailList) {
+    private Long employeeAsignedId;
+
+    private String pin;
+
+    public Order(Long id, User customer, Restaurant restaurant, Status status, List<OrderDetail> orderDetailList, Long employeeAsignedId, String pin) {
         this.id = id;
         this.customer = customer;
         this.restaurant = restaurant;
         this.status = status;
         this.orderDetailList = orderDetailList;
+        this.employeeAsignedId = employeeAsignedId;
+        this.pin = pin;
+    }
+
+    public Long getEmployeeAsignedId() {
+        return employeeAsignedId;
+    }
+
+    public void setEmployeeAsignedId(Long employeeAsignedId) {
+        this.employeeAsignedId = employeeAsignedId;
     }
 
     public List<OrderDetail> getOrderDetailList() {
@@ -63,14 +77,13 @@ public class Order {
         this.status = status;
     }
 
-
-    @Override
-    public String toString() {
-        return "Order{" +
-                "id=" + id +
-                ", customer=" + customer +
-                ", restaurant=" + restaurant +
-                ", status=" + status +
-                '}';
+    public String getPin() {
+        return pin;
     }
+
+    public void setPin(String pin) {
+        this.pin = pin;
+    }
+
+
 }

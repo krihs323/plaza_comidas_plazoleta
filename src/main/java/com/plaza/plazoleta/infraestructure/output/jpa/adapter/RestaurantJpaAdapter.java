@@ -1,9 +1,10 @@
 package com.plaza.plazoleta.infraestructure.output.jpa.adapter;
 
+import com.plaza.plazoleta.domain.model.PageResult;
 import com.plaza.plazoleta.domain.model.Restaurant;
 import com.plaza.plazoleta.domain.spi.IRestaurantPersistencePort;
-import com.plaza.plazoleta.infraestructure.exception.RestaurantValidationException;
-import com.plaza.plazoleta.infraestructure.exceptionhandler.ExceptionResponse;
+import com.plaza.plazoleta.domain.exception.RestaurantValidationException;
+import com.plaza.plazoleta.domain.exception.ExceptionResponse;
 import com.plaza.plazoleta.infraestructure.output.jpa.entity.RestaurantEntity;
 import com.plaza.plazoleta.infraestructure.output.jpa.mapper.RestaurantEntityMapper;
 import com.plaza.plazoleta.infraestructure.output.jpa.repository.IRestaurantRepository;
@@ -12,9 +13,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-//@RequiredArgsConstructor
 public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
 
     private final IRestaurantRepository restaurantRepository;
@@ -43,12 +45,28 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
     }
 
     @Override
-    public Page<Restaurant> getAllRestaurants(Integer pages) {
+    public PageResult<Restaurant> getAllRestaurants(Integer pages) {
 
         Sort sort = Sort.by(Sort.Direction.ASC , "name");
         Pageable pageable = PageRequest.of(0, pages, sort);
         Page<RestaurantEntity> restaurantRepositoryAll = restaurantRepository.findAll(pageable);
-        return restaurantRepositoryAll.map(restaurantEntityMapper::toRestaurant);
+
+        List<Restaurant> domainRestaurants = restaurantRepositoryAll
+                .getContent()
+                .stream()
+                .map(restaurantEntityMapper::toRestaurant)
+                .collect(Collectors.toList());
+
+        return new PageResult<>(
+                domainRestaurants,
+                restaurantRepositoryAll.getNumber(),
+                restaurantRepositoryAll.getSize(),
+                restaurantRepositoryAll.getTotalElements(),
+                restaurantRepositoryAll.getTotalPages(),
+                restaurantRepositoryAll.isLast()
+        );
+
+
     }
 
 

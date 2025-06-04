@@ -1,10 +1,12 @@
 package com.plaza.plazoleta.infraestructure.output.jpa.adapter;
 
-import com.plaza.plazoleta.domain.api.IOrderPersistencePort;
+import com.plaza.plazoleta.domain.model.PageResult;
+import com.plaza.plazoleta.domain.spi.IOrderPersistencePort;
 import com.plaza.plazoleta.domain.model.Order;
 import com.plaza.plazoleta.domain.model.OrderDetail;
 import com.plaza.plazoleta.domain.model.Status;
 import com.plaza.plazoleta.infraestructure.exception.MenuNotFoundException;
+import com.plaza.plazoleta.domain.exception.ExceptionResponse;
 import com.plaza.plazoleta.infraestructure.output.jpa.entity.MenuEntity;
 import com.plaza.plazoleta.infraestructure.output.jpa.entity.OrderDetailEntity;
 import com.plaza.plazoleta.infraestructure.output.jpa.entity.OrderEntity;
@@ -12,10 +14,14 @@ import com.plaza.plazoleta.infraestructure.output.jpa.mapper.OrderEntityMapper;
 import com.plaza.plazoleta.infraestructure.output.jpa.repository.IMenuRepository;
 import com.plaza.plazoleta.infraestructure.output.jpa.repository.IOrderDetailRepository;
 import com.plaza.plazoleta.infraestructure.output.jpa.repository.IOrderRepository;
-import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class OrderJpaAdapter implements IOrderPersistencePort {
 
@@ -37,22 +43,21 @@ public class OrderJpaAdapter implements IOrderPersistencePort {
 
         OrderEntity orderSaved = orderRepository.save(orderEntityMapper.toEntity(order));
         //Grabar el detalle
-
-        List<OrderDetailEntity> detalles = new java.util.ArrayList<>();
+        List<OrderDetailEntity> details = new java.util.ArrayList<>();
         //Setear el id del pedido
         for (OrderDetail req : order.getOrderDetailList()) {
             //Buscar menuEntity
             MenuEntity menuEntity = menuRepository.findById(req.getIdMenu())
-                    .orElseThrow(() -> new EntityNotFoundException("Plato con ID " + req.getIdMenu() + " no encontrado."));
+                    .orElseThrow(() -> new MenuNotFoundException(ExceptionResponse.RESTAURANT_VALIDATION_NOT_FOUND.getMessage()));
             OrderDetailEntity detailEntity = new OrderDetailEntity();
             detailEntity.setOrderEntity(orderSaved);
             detailEntity.setMenuEntity(menuEntity);
             detailEntity.setAmount(req.getAmount());
             // precioUnitario will be set by @PrePersist in PedidoDetalle
-            detalles.add(detailEntity);
+            details.add(detailEntity);
         }
 
-        orderDetailRepository.saveAll(detalles);
+        orderDetailRepository.saveAll(details);
 
     }
 
@@ -63,4 +68,45 @@ public class OrderJpaAdapter implements IOrderPersistencePort {
         return Optional.ofNullable(orderEntityMapper.toOrder(orderEntity.orElse(null)));
 
     }
+
+    @Override
+    public PageResult<Order> getOrderByStatus(Long restaurantId, Status status, int page, int size, String sortBy, String sortDir) {
+        Sort sort = Sort.by(Sort.Direction.ASC , sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<OrderEntity> orderEntityListByStatus = orderRepository.findByRestaurantEntityIdAndStatus(restaurantId, status, pageable);
+
+        List<Order> domainOrders = orderEntityListByStatus
+                .getContent()
+                .stream()
+                .map(orderEntityMapper::toOrder)
+                .collect(Collectors.toList());
+
+        return new PageResult<>(
+                domainOrders,
+                orderEntityListByStatus.getNumber(),
+                orderEntityListByStatus.getSize(),
+                orderEntityListByStatus.getTotalElements(),
+                orderEntityListByStatus.getTotalPages(),
+                orderEntityListByStatus.isLast()
+        );
+    }
+
+    @Override
+    public void UpdateStatusOrder(Long id, Order order) {
+        orderRepository.save(orderEntityMapper.toEntity(order));
+    }
+
+    @Override
+    public Optional<Order> finByPin(String pin) {
+        Optional<OrderEntity> orderEntity = orderRepository.findByPinContaining(pin);
+        return Optional.ofNullable(orderEntityMapper.toOrder(orderEntity.orElse(null)));
+    }
+
+    @Override
+    public Optional<Order> finById(Long id) {
+        Optional<OrderEntity> orderEntity = orderRepository.findById(id);
+        return Optional.ofNullable(orderEntityMapper.toOrder(orderEntity.orElse(null)));
+    }
+
+
 }
