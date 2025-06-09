@@ -5,6 +5,7 @@ public enum Constant {
     MESSAGE_PIN("Pin para reclamar"),
     MESSAGE_ORDER_IN_PREPARATION("Lo sentimos, tu pedido ya está en preparación y no puede cancelarse");
 
+
     private String value;
 
     Constant(String value) {

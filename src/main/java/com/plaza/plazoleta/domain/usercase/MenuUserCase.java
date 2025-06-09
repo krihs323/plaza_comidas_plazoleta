@@ -1,6 +1,7 @@
 package com.plaza.plazoleta.domain.usercase;
 
 import com.plaza.plazoleta.domain.api.IMenuServicePort;
+import com.plaza.plazoleta.domain.exception.MenuUserCaseValidationException;
 import com.plaza.plazoleta.domain.model.*;
 import com.plaza.plazoleta.domain.model.Menu;
 import com.plaza.plazoleta.domain.spi.IMenuPersistencePort;
@@ -10,7 +11,6 @@ import com.plaza.plazoleta.domain.exception.MenuValidationException;
 import com.plaza.plazoleta.domain.exception.ExceptionResponse;
 import com.plaza.plazoleta.domain.validation.MenuValidations;
 
-import java.util.Objects;
 import java.util.Optional;
 
 public class MenuUserCase implements IMenuServicePort {
@@ -32,7 +32,7 @@ public class MenuUserCase implements IMenuServicePort {
         MenuValidations.saveMenu(menu);
         Restaurant restaurant = restaurantPersistencePort.getRestaurantById(menu.getRestaurant().getId());
         User userAuth = userPersistencePort.getUseAuth();
-        if (userAuth.getIdUser() != restaurant.getUserId()) {
+        if (!userAuth.getIdUser().equals(restaurant.getUserId())) {
             throw new MenuValidationException(ExceptionResponse.MENU_VALIATION_OWNER.getMessage());
         }
 
@@ -43,27 +43,36 @@ public class MenuUserCase implements IMenuServicePort {
     public void updateMenu(Long id, Menu menu) {
         MenuValidations.updateMenu(menu);
         Optional<Menu> menuFound = menuPersistencePort.findById(id);
+        if (menuFound.isEmpty()) {
+            throw new MenuUserCaseValidationException(ExceptionResponse.MENU_VALIATION_NOT_FOUND.getMessage());
+        }
+        Menu menuToUpdate = menuFound.get();
         User userAuth = userPersistencePort.getUseAuth();
-        if (userAuth.getIdUser() != menuFound.get().getRestaurant().getUserId()) {
+        if (!userAuth.getIdUser().equals(menuToUpdate.getRestaurant().getUserId())) {
             throw new MenuValidationException(ExceptionResponse.MENU_VALIATION_OWNER.getMessage());
         }
 
-        menuFound.get().setDescription(menu.getDescription());
-        menuFound.get().setPrice(menu.getPrice());
+        menuToUpdate.setDescription(menu.getDescription());
+        menuToUpdate.setPrice(menu.getPrice());
 
-        menuPersistencePort.updateMenu(id, menuFound.get());
+        menuPersistencePort.saveMenu(menuToUpdate);
     }
 
     @Override
     public void disableMenu(Long id, Menu menu) {
 
+        //TODO El optional debe validar con el isPresent -- Ajustado
         Optional<Menu> menuFound = menuPersistencePort.findById(id);
+        if (menuFound.isEmpty()) {
+            throw new MenuUserCaseValidationException(ExceptionResponse.MENU_VALIATION_NOT_FOUND.getMessage());
+        }
+        Menu menuToUpdate = menuFound.get();
         User userAuth = userPersistencePort.getUseAuth();
-        if (!Objects.equals(userAuth.getIdUser(), menuFound.get().getRestaurant().getUserId())) {
+        if (!userAuth.getIdUser().equals(menuToUpdate.getRestaurant().getUserId())) {
             throw new MenuValidationException(ExceptionResponse.MENU_VALIATION_OWNER.getMessage());
         }
-        menuFound.get().setActive(menu.getActive());
-        menuPersistencePort.updateMenu(id, menuFound.orElseThrow());
+        menuToUpdate.setActive(menu.getActive());
+        menuPersistencePort.saveMenu(menuToUpdate);
     }
 
     @Override

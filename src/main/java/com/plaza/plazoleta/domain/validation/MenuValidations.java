@@ -1,5 +1,6 @@
 package com.plaza.plazoleta.domain.validation;
 
+import com.plaza.plazoleta.domain.constants.ConstantNumber;
 import com.plaza.plazoleta.domain.exception.ExceptionResponse;
 import com.plaza.plazoleta.domain.exception.MenuUserCaseValidationException;
 import com.plaza.plazoleta.domain.model.Menu;
@@ -14,8 +15,7 @@ public class MenuValidations extends Validate {
         if (!validate(menu.getPrice(), ConstantValidation.PATTERN_NUMBER.getValue())) {
             throw new MenuUserCaseValidationException(ExceptionResponse.VALIDATION_PRICE.getMessage());
         }
-
-        if (menu.getPrice()<0) {
+        if (menu.getPrice() < ConstantNumber.VALIDATION_POSITIVE.getValue()) {
             throw new MenuUserCaseValidationException(ExceptionResponse.VALIDATION_PRICE_POSITIVE.getMessage());
         }
 
@@ -43,7 +43,7 @@ public class MenuValidations extends Validate {
             throw new MenuUserCaseValidationException(ExceptionResponse.VALIDATION_PRICE.getMessage());
         }
 
-        if (menu.getPrice()<0) {
+        if (menu.getPrice()<ConstantNumber.VALIDATION_POSITIVE.getValue()) {
             throw new MenuUserCaseValidationException(ExceptionResponse.VALIDATION_PRICE_POSITIVE.getMessage());
         }
 

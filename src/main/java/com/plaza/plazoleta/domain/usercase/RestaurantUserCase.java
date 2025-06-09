@@ -11,6 +11,8 @@ import com.plaza.plazoleta.domain.validation.RestaurantValidations;
 import com.plaza.plazoleta.domain.exception.RestaurantValidationException;
 import com.plaza.plazoleta.domain.exception.ExceptionResponse;
 
+import java.util.HashMap;
+
 public class RestaurantUserCase implements IRestaurantServicePort {
 
     private final IRestaurantPersistencePort restaurantPersistencePort;
@@ -26,11 +28,14 @@ public class RestaurantUserCase implements IRestaurantServicePort {
     @Override
     public void saveRestaurant(Restaurant restaurant) {
         RestaurantValidations.saveRestaurant(restaurant);
-        User userAuth = userPersistencePort.getUseAuth();
+        User userAuth = userPersistencePort.getById(restaurant.getUserId());
         if (!userAuth.getRol().equals(Role.OWNER.toString())) {
             throw new RestaurantValidationException(ExceptionResponse.MENU_VALIATION.getMessage());
         }
-        restaurantPersistencePort.saveRestaurant(restaurant);
+        Restaurant restaurantSaved = restaurantPersistencePort.saveRestaurant(restaurant);
+        HashMap<String, Long> restaurantEmployee = new HashMap<>();
+        restaurantEmployee.put("idRestaurantEmployee", restaurantSaved.getId());
+        userPersistencePort.updateUserRestaurantAsOwner(restaurant.getUserId(), restaurantEmployee);
     }
 
     @Override

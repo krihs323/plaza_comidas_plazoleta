@@ -1,10 +1,7 @@
 package com.plaza.plazoleta.infraestructure.output.jpa.adapter;
 
-import com.plaza.plazoleta.domain.model.PageResult;
+import com.plaza.plazoleta.domain.model.*;
 import com.plaza.plazoleta.domain.spi.IOrderPersistencePort;
-import com.plaza.plazoleta.domain.model.Order;
-import com.plaza.plazoleta.domain.model.OrderDetail;
-import com.plaza.plazoleta.domain.model.Status;
 import com.plaza.plazoleta.infraestructure.exception.MenuNotFoundException;
 import com.plaza.plazoleta.domain.exception.ExceptionResponse;
 import com.plaza.plazoleta.infraestructure.output.jpa.entity.MenuEntity;
@@ -42,18 +39,14 @@ public class OrderJpaAdapter implements IOrderPersistencePort {
     public void saveOrder(Order order) {
 
         OrderEntity orderSaved = orderRepository.save(orderEntityMapper.toEntity(order));
-        //Grabar el detalle
         List<OrderDetailEntity> details = new java.util.ArrayList<>();
-        //Setear el id del pedido
         for (OrderDetail req : order.getOrderDetailList()) {
-            //Buscar menuEntity
             MenuEntity menuEntity = menuRepository.findById(req.getIdMenu())
                     .orElseThrow(() -> new MenuNotFoundException(ExceptionResponse.RESTAURANT_VALIDATION_NOT_FOUND.getMessage()));
             OrderDetailEntity detailEntity = new OrderDetailEntity();
             detailEntity.setOrderEntity(orderSaved);
             detailEntity.setMenuEntity(menuEntity);
             detailEntity.setAmount(req.getAmount());
-            // precioUnitario will be set by @PrePersist in PedidoDetalle
             details.add(detailEntity);
         }
 
@@ -79,7 +72,7 @@ public class OrderJpaAdapter implements IOrderPersistencePort {
                 .getContent()
                 .stream()
                 .map(orderEntityMapper::toOrder)
-                .collect(Collectors.toList());
+                .toList();
 
         return new PageResult<>(
                 domainOrders,
@@ -92,21 +85,20 @@ public class OrderJpaAdapter implements IOrderPersistencePort {
     }
 
     @Override
-    public void UpdateStatusOrder(Long id, Order order) {
+    public void updateStatusOrder(Order order) {
         orderRepository.save(orderEntityMapper.toEntity(order));
     }
 
     @Override
     public Optional<Order> finByPin(String pin) {
         Optional<OrderEntity> orderEntity = orderRepository.findByPinContaining(pin);
-        return Optional.ofNullable(orderEntityMapper.toOrder(orderEntity.orElse(null)));
+        return orderEntity.map(orderEntityMapper::toOrder);
     }
 
     @Override
     public Optional<Order> finById(Long id) {
         Optional<OrderEntity> orderEntity = orderRepository.findById(id);
-        return Optional.ofNullable(orderEntityMapper.toOrder(orderEntity.orElse(null)));
+        return orderEntity.map(orderEntityMapper::toOrder);
     }
-
 
 }

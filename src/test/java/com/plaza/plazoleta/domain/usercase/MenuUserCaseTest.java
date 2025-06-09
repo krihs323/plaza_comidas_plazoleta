@@ -8,9 +8,6 @@ import com.plaza.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.plaza.plazoleta.domain.spi.IUserPersistencePort;
 import com.plaza.plazoleta.domain.exception.MenuValidationException;
 import com.plaza.plazoleta.domain.exception.ExceptionResponse;
-import com.plaza.plazoleta.infraestructure.security.JwtService;
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.domain.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,29 +38,16 @@ class MenuUserCaseTest {
     @Mock
     private IUserPersistencePort userPersistencePort;
 
-    @Mock
-    private HttpServletRequest httpServletRequest;
-    @Mock
-    private JwtService jwtService;
-
-
     @InjectMocks
     private MenuUserCase menuUserCase;
 
-    //Setup
     private Long idRestaurant;
     private int page;
     private int size;
     private String sortBy;
-    private Pageable pageable;
-    private Sort sort;
-
-    private String token;
-
     private Menu menu;
-
     private User user;
-
+    private PageResult<Menu> pageResultMenu;
 
     @BeforeEach
     void setUp() {
@@ -74,13 +57,9 @@ class MenuUserCaseTest {
         page = 0;
         size = 2;
         sortBy = "id";
-        sort = Sort.by(Sort.Direction.ASC , sortBy);
-        pageable = PageRequest.of(page, size, sort);
 
-        //creacion del mock de usuarios
         user = new User(Role.OWNER.name(), 9L, null);
 
-        //creacion del mock menu
         Long id = 1L;
         String name = "Arroz con pollo";
         Long price = 2000L;
@@ -92,7 +71,6 @@ class MenuUserCaseTest {
         category.setName("Comida Tipica");
 
 
-        //Objeto restaurante
         Long idRestaurante = 20L;
 
         String nameRestaurant = "El Forno";
@@ -104,7 +82,7 @@ class MenuUserCaseTest {
         Long userId = 9L;
 
         Restaurant restaurant = new Restaurant(idRestaurante, nameRestaurant, numberId, address, phoneNumber, urlLogoRestaurant, userId);
-        //Finaliza objeto restaurante
+
         Boolean active = true;
         menu = new Menu();
         menu.setId(id);
@@ -115,6 +93,18 @@ class MenuUserCaseTest {
         menu.setCategory(category);
         menu.setRestaurant(restaurant);
         menu.setActive(active);
+
+        List<Menu> testMenus = new ArrayList<>();
+        testMenus.add(menu);
+        testMenus.add(menu);
+
+        pageResultMenu = new PageResult<>();
+        pageResultMenu.setContent(testMenus);
+        pageResultMenu.setPageNumber(1);
+        pageResultMenu.setPageSize(1);
+        pageResultMenu.setTotalPages(1);
+        pageResultMenu.setLast(true);
+        pageResultMenu.setTotalElements(1);
 
     }
 
@@ -153,11 +143,11 @@ class MenuUserCaseTest {
         Mockito.when(menuPersistencePort.findById(anyLong())).thenReturn(menuFound);
         Mockito.when(categoryPersistencePort.getCategoryById(anyLong())).thenReturn(categoryNew);
 
-        doNothing().when(menuPersistencePort).updateMenu(anyLong(), any());
+        doNothing().when(menuPersistencePort).saveMenu(any());
 
         menuUserCase.updateMenu(1L, menu);
 
-        verify(menuPersistencePort).updateMenu(1L, menu);
+        verify(menuPersistencePort).saveMenu(menu);
 
     }
 
@@ -195,7 +185,7 @@ class MenuUserCaseTest {
         Mockito.when(menuPersistencePort.findById(anyLong())).thenReturn(menuFound);
         Mockito.when(categoryPersistencePort.getCategoryById(anyLong())).thenReturn(categoryNew);
 
-        doNothing().when(menuPersistencePort).updateMenu(anyLong(), any());
+        doNothing().when(menuPersistencePort).saveMenu(any());
 
         MenuValidationException exception = assertThrows(MenuValidationException.class, () -> {
             menuUserCase.updateMenu(1L, menu);
@@ -205,7 +195,6 @@ class MenuUserCaseTest {
 
     }
 
-    //HU07
     @DisplayName("Should disable a menu")
     @Test
     void disableMenu(){
@@ -213,18 +202,14 @@ class MenuUserCaseTest {
         menu.getRestaurant().setUserId(9L);
         Optional<Menu> menuFound = Optional.of(menu);
 
-        User userMock = new User();
-        userMock.setIdUser(9L);
-        userMock.setRol("OWNER");
-
         Mockito.when(menuPersistencePort.findById(anyLong())).thenReturn(menuFound);
         Mockito.when(userPersistencePort.getUseAuth()).thenReturn(user);
 
-        doNothing().when(menuPersistencePort).updateMenu(anyLong(), any());
+        doNothing().when(menuPersistencePort).saveMenu(any());
 
         menuUserCase.disableMenu(1L, menu);
 
-        verify(menuPersistencePort).updateMenu(1L, menu);
+        verify(menuPersistencePort).saveMenu(menu);
     }
 
     @DisplayName("Should not disabled or enable a menu when user is not the restaurants owner")
@@ -240,7 +225,7 @@ class MenuUserCaseTest {
         Mockito.when(menuPersistencePort.findById(anyLong())).thenReturn(menuFound);
         Mockito.when(userPersistencePort.getUseAuth()).thenReturn(user);
 
-        doNothing().when(menuPersistencePort).updateMenu(anyLong(), any());
+        doNothing().when(menuPersistencePort).saveMenu(any());
 
         MenuValidationException exception = assertThrows(MenuValidationException.class, () ->
             menuUserCase.disableMenu(1L, menu));
@@ -253,33 +238,18 @@ class MenuUserCaseTest {
     @Test
     void getMenuByRestaurant(){
         Long idCategory = null;
-
-        List<Menu> testMenus = new ArrayList<>();
-
-        testMenus.add(menu);
-        testMenus.add(menu);
-
-        Page<Menu> menusPage = new PageImpl<>(testMenus, pageable, testMenus.size());
-        //when(menuPersistencePort.getMenuByRestaurant(idRestaurant, idCategory, page, size, sortBy, "")).thenReturn(menusPage);
-        //<Menu> menuPageReturn = menuUserCase.getMenuByRestaurant(idRestaurant, "", page, size, sortBy, "");
-        //assertEquals(2, menuPageReturn.getContent().size());
+        when(menuPersistencePort.getMenuByRestaurant(idRestaurant, idCategory, page, size, sortBy, "")).thenReturn(pageResultMenu);
+        PageResult<Menu> menuPageReturn = menuUserCase.getMenuByRestaurant(idRestaurant, "", page, size, sortBy, "");
+        assertEquals(2, menuPageReturn.getContent().size());
     }
 
     @DisplayName("Should return menues by restaurant and category")
     @Test
-    void getMenuByRestaurantAndCategory(){
-
+    void getMenuByRestaurantWhenCategoryIsNoNull(){
         Long idCategory = 1L;
-
-        List<Menu> testMenus = new ArrayList<>();
-        testMenus.add(menu);
-        testMenus.add(menu);
-
-        Page<Menu> menusPage = new PageImpl<>(testMenus, pageable, testMenus.size());
-        //when(menuPersistencePort.getMenuByRestaurant(idRestaurant, idCategory, page, size, sortBy, "")).thenReturn(menusPage);
-        //Page<Menu> menuPageReturn = menuUserCase.getMenuByRestaurant(idRestaurant, "1", page, size, sortBy, "");
-        //assertEquals(2, menuPageReturn.getContent().size());
-
+        when(menuPersistencePort.getMenuByRestaurant(idRestaurant, idCategory, page, size, sortBy, "")).thenReturn(pageResultMenu);
+        PageResult<Menu> menuPageReturn = menuUserCase.getMenuByRestaurant(idRestaurant, "1", page, size, sortBy, "");
+        assertEquals(2, menuPageReturn.getContent().size());
     }
 
     @DisplayName("Save menu should not save if name is invalid")

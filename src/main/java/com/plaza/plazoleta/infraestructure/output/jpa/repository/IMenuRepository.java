@@ -5,11 +5,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-
 public interface IMenuRepository extends JpaRepository<MenuEntity, Long> {
 
-    Page<MenuEntity> findByRestaurantEntityId(Long restaurantId, Pageable pageable);
+    Page<MenuEntity> findByRestaurantEntityIdAndActive(Long restaurantId, Boolean status, Pageable pageable);
 
-    Page<MenuEntity> findByRestaurantEntityIdAndCategoryEntityId(Long restaurantId, Long categoryId, Pageable pageable);
+    Page<MenuEntity> findByRestaurantEntityIdAndCategoryEntityIdAndActive(Long restaurantId, Long categoryId, Boolean status, Pageable pageable);
 }

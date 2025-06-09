@@ -1,5 +1,6 @@
 package com.plaza.plazoleta.infraestructure.output.jpa.adapter;
 
+import com.plaza.plazoleta.domain.model.PageResult;
 import com.plaza.plazoleta.domain.model.Restaurant;
 import com.plaza.plazoleta.domain.exception.RestaurantValidationException;
 import com.plaza.plazoleta.domain.exception.ExceptionResponse;
@@ -33,21 +34,37 @@ class RestaurantJpaAdapterTest {
     @InjectMocks
     private RestaurantJpaAdapter restaurantJpaAdapter;
 
+    private RestaurantEntity restaurantEntity;
+    private Restaurant restaurant;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        restaurantEntity = new RestaurantEntity();
+        restaurantEntity.setId(1L);
+        restaurantEntity.setName("Il Forno");
+        restaurantEntity.setUserId(1);
+        restaurantEntity.setAddress("av 1 2 10");
+        restaurantEntity.setUrlLogo("url");
+        restaurantEntity.setNumberId(12345L);
+        restaurantEntity.setPhoneNumber("+789787688");
+
+        restaurant = new Restaurant();
+        restaurant.setName("Il Forno");
+        restaurant.setUrlLogo("http");
+
     }
 
     @Test
     void saveRestaurant() {
-        RestaurantEntity restaurantMock = new RestaurantEntity();
-        restaurantMock.setId(1L);
-        restaurantMock.setName("Il Forno");
-        Mockito.when(restaurantEntityMapper.toEntity(any())).thenReturn(restaurantMock);
+
+
+        Mockito.when(restaurantEntityMapper.toEntity(any())).thenReturn(restaurantEntity);
 
         restaurantJpaAdapter.saveRestaurant(any());
 
-        verify(restaurantRepository).save(restaurantMock);
+        verify(restaurantRepository).save(restaurantEntity);
 
     }
 
@@ -63,42 +80,27 @@ class RestaurantJpaAdapterTest {
         restaurantMock.setNumberId(12345L);
         restaurantMock.setPhoneNumber("+789787688");
 
-        RestaurantEntity restaurantEntityMock = new RestaurantEntity();
-        restaurantEntityMock.setId(1L);
-        restaurantEntityMock.setName("Il Forno");
-        restaurantEntityMock.setUserId(1);
-        restaurantEntityMock.setAddress("av 1 2 10");
-        restaurantEntityMock.setUrlLogo("url");
-        restaurantEntityMock.setNumberId(12345L);
-        restaurantEntityMock.setPhoneNumber("+789787688");
+
 
         Mockito.when(restaurantEntityMapper.toRestaurant(any())).thenReturn(restaurantMock);
-        Mockito.when(restaurantRepository.findById(anyLong())).thenReturn(Optional.of(restaurantEntityMock));
+        Mockito.when(restaurantRepository.findById(anyLong())).thenReturn(Optional.of(restaurantEntity));
 
         Restaurant restaurantExpected = restaurantJpaAdapter.getRestaurantById(anyLong());
 
-        assertEquals(restaurantExpected.getId(), restaurantEntityMock.getId());
+        assertEquals(restaurantExpected.getId(), restaurantEntity.getId());
 
     }
 
     @Test
     void getRestaurantByIdNotFoundException() {
 
-        Restaurant restaurantMock = new Restaurant();
-        restaurantMock.setId(1L);
-        restaurantMock.setName("Il Forno");
-
-        RestaurantEntity restaurantEntityMock = new RestaurantEntity();
-        restaurantEntityMock.setId(1L);
-        restaurantEntityMock.setName("Il Forno");
-
-        Mockito.when(restaurantEntityMapper.toRestaurant(any())).thenReturn(restaurantMock);
+        Mockito.when(restaurantEntityMapper.toRestaurant(any())).thenReturn(restaurant);
         Mockito.when(restaurantRepository.findById(anyLong())).thenReturn(Optional.empty());
 
 
-        RestaurantValidationException exception = assertThrows(RestaurantValidationException.class, () -> {
-            Restaurant restaurantExpected = restaurantExpected = restaurantJpaAdapter.getRestaurantById(anyLong());
-        });
+        RestaurantValidationException exception = assertThrows(RestaurantValidationException.class, () ->
+            restaurantJpaAdapter.getRestaurantById(anyLong())
+        );
 
         assertEquals(ExceptionResponse.RESTAURANT_VALIDATION_NOT_FOUND.getMessage(), exception.getMessage());
 
@@ -113,23 +115,30 @@ class RestaurantJpaAdapterTest {
         Sort sort = Sort.by(Sort.Direction.ASC , "name");
         Pageable pageable = PageRequest.of(0,2, sort);
 
-        RestaurantEntity restaurantEntityMock = new RestaurantEntity();
-        restaurantEntityMock.setName("Il Forno");
-        restaurantEntityMock.setUrlLogo("http");
-        testRestaurants.add(restaurantEntityMock);
-        testRestaurants.add(restaurantEntityMock);
+
+        testRestaurants.add(restaurantEntity);
+        testRestaurants.add(restaurantEntity);
 
         Page<RestaurantEntity> restaurantsPage = new PageImpl<>(testRestaurants, pageable, testRestaurants.size());
 
-        Restaurant restaurant = new Restaurant();
-        restaurant.setName("Il Forno");
-        restaurant.setUrlLogo("http");
 
         when(restaurantRepository.findAll(pageable)).thenReturn(restaurantsPage);
         when(restaurantEntityMapper.toRestaurant(any())).thenReturn(restaurant);
 
-        //Page<Restaurant> restaurantsPageReturn = restaurantJpaAdapter.getAllRestaurants(2);
+        PageResult<Restaurant> restaurantsPageReturn = restaurantJpaAdapter.getAllRestaurants(2);
 
-        //assertEquals(2, restaurantsPageReturn.getContent().size());
+        assertEquals(2, restaurantsPageReturn.getContent().size());
     }
+
+    @DisplayName("Should return restaurant by owner")
+    @Test
+    void getRestaurantByUserId() {
+
+        Mockito.when(restaurantRepository.findByUserId(anyLong())).thenReturn(Optional.of(restaurantEntity));
+        Mockito.when(restaurantEntityMapper.toRestaurant(any())).thenReturn(restaurant);
+
+        Optional<Restaurant> restaurantResponse = restaurantJpaAdapter.getRestaurantByUserId(anyLong());
+        assertEquals(restaurant.getId(), restaurantResponse.get().getId());
+    }
+
 }

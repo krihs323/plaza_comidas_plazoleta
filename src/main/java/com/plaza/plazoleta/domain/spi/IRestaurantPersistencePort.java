@@ -3,10 +3,14 @@ package com.plaza.plazoleta.domain.spi;
 import com.plaza.plazoleta.domain.model.PageResult;
 import com.plaza.plazoleta.domain.model.Restaurant;
 
+import java.util.Optional;
+
 public interface IRestaurantPersistencePort {
 
-    void saveRestaurant(Restaurant restaurant);
+    Restaurant saveRestaurant(Restaurant restaurant);
     Restaurant getRestaurantById(Long id);
 
     PageResult<Restaurant> getAllRestaurants(Integer pages);
+
+    Optional<Restaurant> getRestaurantByUserId(Long idUser);
 }

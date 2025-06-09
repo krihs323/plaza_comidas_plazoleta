@@ -1,6 +1,5 @@
 package com.plaza.plazoleta.infraestructure.output.jpa.entity;
 
-import com.plaza.plazoleta.domain.model.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

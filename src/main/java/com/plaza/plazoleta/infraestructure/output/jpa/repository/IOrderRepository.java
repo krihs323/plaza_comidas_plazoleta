@@ -16,4 +16,5 @@ public interface IOrderRepository extends JpaRepository<OrderEntity, Long> {
     Page<OrderEntity> findByRestaurantEntityIdAndStatus(Long restaurantId, Status status, Pageable pageable);
 
     Optional<OrderEntity> findByPinContaining(String pin);
+
 }

@@ -1,8 +1,6 @@
 package com.plaza.plazoleta.infraestructure.output.jpa.entity;
 
-import com.plaza.plazoleta.domain.model.Restaurant;
 import com.plaza.plazoleta.domain.model.Status;
-import com.plaza.plazoleta.domain.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -43,6 +42,12 @@ public class OrderEntity {
 
     @Column(name = "pin")
     private String pin;
+
+    @Column(name = "fecha_inicio")
+    private Date startDate;
+
+    @Column(name = "fecha_fin")
+    private Date endDate;
 
 }
 

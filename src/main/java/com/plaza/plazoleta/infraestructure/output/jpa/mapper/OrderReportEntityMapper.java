@@ -14,7 +14,7 @@ import java.util.List;
 @Mapper(componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         unmappedSourcePolicy = ReportingPolicy.IGNORE)
-public interface OrderEntityMapper {
+public interface OrderReportEntityMapper {
 
     @Mapping(source = "restaurant", target = "restaurantEntity")
     @Mapping(source = "customer.idUser", target = "customerId")

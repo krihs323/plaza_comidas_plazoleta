@@ -30,34 +30,39 @@ class CategoryJpaAdapterTest {
     @InjectMocks
     private CategoryJpaAdapter categoryJpaAdapter;
 
+    private Category category;
+
+    private CategoryEntity categoryEntity;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        category = new Category(1L, "Comida Tipica");
+
+        categoryEntity = new CategoryEntity(1L, "Comida Tipica");
+
     }
 
     @Test
     void getCategoryById() {
 
-        CategoryEntity categoryEntityMock = new CategoryEntity(1L, "Comida Tipica");
-        Category categoryMock = new Category(1L, "Comida Tipica");
-
-        Optional<CategoryEntity> categoryEntityFound = Optional.of(categoryEntityMock);
+        Optional<CategoryEntity> categoryEntityFound = Optional.of(categoryEntity);
         Mockito.when(categoryRepository.findById(anyLong())).thenReturn(categoryEntityFound);
-        Mockito.when(categoryEntityMapper.toCategory(any())).thenReturn(categoryMock);
+        Mockito.when(categoryEntityMapper.toCategory(any())).thenReturn(category);
 
         Category categoryExpected = categoryJpaAdapter.getCategoryById(anyLong());
 
-        assertEquals(categoryExpected.getId(), categoryMock.getId());
+        assertEquals(categoryExpected.getId(), category.getId());
 
     }
 
     @Test
     void getCategoryByIdException() {
 
-        Category categoryMock = new Category(1L, "Comida Tipica");
 
         Mockito.when(categoryRepository.findById(anyLong())).thenReturn(Optional.empty());
-        Mockito.when(categoryEntityMapper.toCategory(any())).thenReturn(categoryMock);
+        Mockito.when(categoryEntityMapper.toCategory(any())).thenReturn(category);
 
         CategoryValidationException exception = assertThrows(CategoryValidationException.class, () ->
              categoryJpaAdapter.getCategoryById(anyLong())

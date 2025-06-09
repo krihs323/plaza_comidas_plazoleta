@@ -15,7 +15,6 @@ import org.springframework.data.domain.Sort;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
 
@@ -28,14 +27,14 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
     }
 
     @Override
-    public void saveRestaurant(Restaurant restaurant) {
-        restaurantRepository.save(restaurantEntityMapper.toEntity(restaurant));
+    public Restaurant saveRestaurant(Restaurant restaurant) {
+        RestaurantEntity restaurantEntity = restaurantRepository.save(restaurantEntityMapper.toEntity(restaurant));
+
+        return restaurantEntityMapper.toRestaurant(restaurantEntity);
     }
 
     @Override
     public Restaurant getRestaurantById(Long id) {
-
-        //Optional<RestaurantEntity> = restaurantRepository.findBy(id);
         Optional<RestaurantEntity> restaurantEntity = restaurantRepository.findById(id);
         if (restaurantEntity.isPresent()) {
             return restaurantEntityMapper.toRestaurant(restaurantEntity.orElseThrow());
@@ -55,7 +54,7 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
                 .getContent()
                 .stream()
                 .map(restaurantEntityMapper::toRestaurant)
-                .collect(Collectors.toList());
+                .toList();
 
         return new PageResult<>(
                 domainRestaurants,
@@ -67,6 +66,12 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
         );
 
 
+    }
+
+    @Override
+    public Optional<Restaurant> getRestaurantByUserId(Long idUser) {
+        Optional<RestaurantEntity> restaurantEntity = restaurantRepository.findByUserId(idUser);
+        return restaurantEntity.map(restaurantEntityMapper::toRestaurant);
     }
 
 

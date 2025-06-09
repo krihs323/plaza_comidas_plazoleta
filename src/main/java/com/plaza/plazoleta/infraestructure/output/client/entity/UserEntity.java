@@ -10,6 +10,10 @@ public class UserEntity {
 
     private String phoneNumber;
 
+    private String name;
+
+    private String lastName;
+
     public Long getIdUser() {
         return idUser;
     }
@@ -40,5 +44,21 @@ public class UserEntity {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }

@@ -1,9 +1,9 @@
 package com.plaza.plazoleta.domain.spi;
 
 import com.plaza.plazoleta.domain.model.Order;
+import com.plaza.plazoleta.domain.model.OrderReport;
 import com.plaza.plazoleta.domain.model.PageResult;
 import com.plaza.plazoleta.domain.model.Status;
-import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +17,8 @@ public interface IOrderPersistencePort {
 
     Optional<Order> finById(Long id);
 
-    void UpdateStatusOrder(Long id, Order order);
+    void updateStatusOrder(Order order);
 
     Optional<Order> finByPin(String pin);
+
 }

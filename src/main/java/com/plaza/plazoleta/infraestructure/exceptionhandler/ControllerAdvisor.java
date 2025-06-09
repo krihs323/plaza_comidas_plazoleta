@@ -1,6 +1,7 @@
 package com.plaza.plazoleta.infraestructure.exceptionhandler;
 
 import com.plaza.plazoleta.domain.exception.MenuValidationException;
+import com.plaza.plazoleta.domain.exception.OrderUserCaseValidationException;
 import com.plaza.plazoleta.domain.exception.OrderValidationException;
 import com.plaza.plazoleta.domain.exception.RestaurantValidationException;
 import feign.FeignException;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.util.Collections;
 import java.util.Map;
 
-//@ControllerAdvice(basePackages = {"com.plaza.plazoleta.infraestructure"})
 @ControllerAdvice
 public class ControllerAdvisor {
 
@@ -64,6 +64,12 @@ public class ControllerAdvisor {
                 .body(Collections.singletonMap(MESSAGE, ex.getMessage()));
     }
 
+    @ExceptionHandler(    OrderUserCaseValidationException.class)
+    public ResponseEntity<Map<String, String>> handlerOrderUserCaseValidationException(
+            OrderUserCaseValidationException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(MESSAGE, ex.getMessage()));
+    }
 
 
 
