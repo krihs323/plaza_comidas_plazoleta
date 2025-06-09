@@ -5,7 +5,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class OrderDeliverRequest {
+public class OrderReportEmployeeResponse {
 
-        private String pin;
+    private Integer employeeId;
+
+    private Number avg;
+
+
 }
+
+

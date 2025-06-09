@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(path = "/api/plazoleta")
 public class SquareMallRestController {
@@ -65,7 +67,7 @@ public class SquareMallRestController {
 
     @Operation(summary = "Update menu")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Menu updated", content = @Content),
+            @ApiResponse(responseCode = "204", description = "Menu updated successful", content = @Content),
             @ApiResponse(responseCode = "409", description = "Menu already exists", content = @Content)
     })
     @PutMapping("/menu/{id}")
@@ -85,8 +87,7 @@ public class SquareMallRestController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    //Hu10
-    @Operation(summary = "Get menu")
+    @Operation(summary = "Get menu by restaurant")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Menu by restaurant", content = @Content),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)
@@ -180,5 +181,6 @@ public class SquareMallRestController {
         orderHandler.updateOrderToCanceled(orderId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
 
 }

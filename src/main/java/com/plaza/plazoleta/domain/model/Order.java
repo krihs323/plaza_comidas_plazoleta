@@ -1,6 +1,7 @@
 package com.plaza.plazoleta.domain.model;
 
 
+import java.util.Date;
 import java.util.List;
 
 public class Order {
@@ -19,7 +20,11 @@ public class Order {
 
     private String pin;
 
-    public Order(Long id, User customer, Restaurant restaurant, Status status, List<OrderDetail> orderDetailList, Long employeeAsignedId, String pin) {
+    private Date startDate;
+
+    private Date endDate;
+
+    public Order(Long id, User customer, Restaurant restaurant, Status status, List<OrderDetail> orderDetailList, Long employeeAsignedId, String pin, Date startDate, Date endDate) {
         this.id = id;
         this.customer = customer;
         this.restaurant = restaurant;
@@ -27,6 +32,8 @@ public class Order {
         this.orderDetailList = orderDetailList;
         this.employeeAsignedId = employeeAsignedId;
         this.pin = pin;
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
     public Long getEmployeeAsignedId() {
@@ -85,5 +92,19 @@ public class Order {
         this.pin = pin;
     }
 
+    public Date getStartDate() {
+        return startDate;
+    }
 
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
 }

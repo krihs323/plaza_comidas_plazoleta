@@ -116,7 +116,6 @@ public class BeanConfiguration {
         return new NotificationClientAdapter(notificationFeignClient, messageEntityMapper, httpServletRequest);
     }
 
-    //Hu11
     @Bean
     public IOrderPersistencePort orderPersistencePort(){
         return new OrderJpaAdapter(orderRepository, orderEntityMapper, orderDetailRepository, menuRepository);
@@ -130,7 +129,7 @@ public class BeanConfiguration {
 
     @Bean
     public IOrderServicePort orderServicePort(){
-        return new OrderUserCase(orderPersistencePort(), userPersistencePort(), notificationPersistencePort(), traceabilityPersistencePort());
+        return new OrderUserCase(orderPersistencePort(), userPersistencePort(), notificationPersistencePort(), traceabilityPersistencePort(), restaurantPersistencePort());
     }
 
 }

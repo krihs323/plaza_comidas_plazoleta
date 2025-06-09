@@ -1,14 +1,11 @@
 package com.plaza.plazoleta.domain.usercase;
 
 import com.plaza.plazoleta.domain.exception.RestaurantUserCaseValidationException;
-import com.plaza.plazoleta.domain.model.Restaurant;
-import com.plaza.plazoleta.domain.model.Role;
-import com.plaza.plazoleta.domain.model.User;
+import com.plaza.plazoleta.domain.model.*;
 import com.plaza.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.plaza.plazoleta.domain.spi.IUserPersistencePort;
 import com.plaza.plazoleta.domain.exception.RestaurantValidationException;
 import com.plaza.plazoleta.domain.exception.ExceptionResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,18 +13,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class RestaurantUserCaseTest {
 
@@ -37,15 +29,15 @@ class RestaurantUserCaseTest {
     @Mock
     private IUserPersistencePort userPersistencePort;
 
-    @Mock
-    private HttpServletRequest httpServletRequest;
-
     @InjectMocks
     private RestaurantUserCase restaurantUserCase;
 
     private User user;
 
     private Restaurant restaurant;
+
+    private PageResult<Restaurant> pageResultRestaurant;
+
 
     @BeforeEach
     void setUp() {
@@ -60,6 +52,18 @@ class RestaurantUserCaseTest {
         restaurant.setAddress("Avenida siempre viva");
         restaurant.setPhoneNumber("+573155763456");
         restaurant.setUrlLogo("hhpt:");
+
+        List<Restaurant> testRestaurants = new ArrayList<>();
+        testRestaurants.add(restaurant);
+        testRestaurants.add(restaurant);
+
+        pageResultRestaurant = new PageResult<>();
+        pageResultRestaurant.setContent(testRestaurants);
+        pageResultRestaurant.setPageNumber(1);
+        pageResultRestaurant.setPageSize(1);
+        pageResultRestaurant.setTotalPages(1);
+        pageResultRestaurant.setLast(true);
+        pageResultRestaurant.setTotalElements(1);
     }
 
 
@@ -68,6 +72,8 @@ class RestaurantUserCaseTest {
 
         Mockito.when(userPersistencePort.getUseAuth()).thenReturn(user);
         when(userPersistencePort.getById(anyLong())).thenReturn(user);
+        when(restaurantPersistencePort.saveRestaurant(any())).thenReturn(restaurant);
+        doNothing().when(userPersistencePort).updateUserRestaurantAsOwner(anyLong(), any());
 
         restaurantUserCase.saveRestaurant(restaurant);
 
@@ -94,22 +100,11 @@ class RestaurantUserCaseTest {
     @Test
     void getAllRestaurants() {
 
-        List<Restaurant> testRestaurants = new ArrayList<>();
-        Pageable pageable = PageRequest.of(0,2);
-
-        testRestaurants.add(restaurant);
-        testRestaurants.add(restaurant);
-
-        //Page<Restaurant> restaurantsPage = new PageImpl<>(testRestaurants, pageable, testRestaurants.size());
-
-        //when(restaurantPersistencePort.getAllRestaurants(2)).thenReturn(restaurantsPage);
-
-        //Page<Restaurant> restaurantsPageReturn = restaurantUserCase.getAllRestaurants(2);
-
-        //assertEquals(2, restaurantsPageReturn.getContent().size());
+        when(restaurantPersistencePort.getAllRestaurants(2)).thenReturn(pageResultRestaurant);
+        PageResult<Restaurant> restaurantsPageReturn = restaurantUserCase.getAllRestaurants(2);
+        assertEquals(2, restaurantsPageReturn.getContent().size());
     }
 
-    //Validaciones
     @Test
     void saveRestaurantWhenNameIsNotValid() {
 
@@ -132,8 +127,11 @@ class RestaurantUserCaseTest {
     @Test
     void saveRestaurantWhenNameContainsNumberAndLetters() {
         restaurant.setName("Restaurant 123");
-        Mockito.when(userPersistencePort.getUseAuth()).thenReturn(user);
+        when(userPersistencePort.getUseAuth()).thenReturn(user);
         when(userPersistencePort.getById(anyLong())).thenReturn(user);
+        when(restaurantPersistencePort.saveRestaurant(any())).thenReturn(restaurant);
+        doNothing().when(userPersistencePort).updateUserRestaurantAsOwner(anyLong(), any());
+
         restaurantUserCase.saveRestaurant(restaurant);
         verify(restaurantPersistencePort).saveRestaurant(any());
     }
@@ -191,6 +189,5 @@ class RestaurantUserCaseTest {
                 restaurantUserCase.saveRestaurant(restaurant));
         assertEquals(ExceptionResponse.VALIDATION_USER_ID.getMessage(), exception.getMessage());
     }
-
 
 }

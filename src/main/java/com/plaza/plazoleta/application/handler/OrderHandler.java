@@ -1,15 +1,14 @@
 package com.plaza.plazoleta.application.handler;
 
-import com.plaza.plazoleta.application.dto.OrderDeliverRequest;
-import com.plaza.plazoleta.application.dto.OrderRequest;
-import com.plaza.plazoleta.application.dto.OrderResponse;
+import com.plaza.plazoleta.application.dto.*;
 import com.plaza.plazoleta.application.mapper.OrderRequestMapper;
 import com.plaza.plazoleta.domain.api.IOrderServicePort;
 import com.plaza.plazoleta.domain.model.Order;
 import com.plaza.plazoleta.domain.model.PageResult;
-import org.springframework.data.domain.Page;
+import com.plaza.plazoleta.domain.validation.OrderValidations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 @Transactional
@@ -26,13 +25,12 @@ public class OrderHandler implements IOrderHandler {
     @Override
     public void saveOrder(OrderRequest orderRequest) {
         Order order = orderRequestMapper.toOrder(orderRequest);
-        System.out.println("order.toString() = " + order.toString());
-
         orderServicePort.saveOrder(order);
     }
 
     @Override
     public PageResult<OrderResponse> getOrderByStatus(String status, int page, int size, String sortBy, String sortDir) {
+        OrderValidations.getORderByStatus(status);
         PageResult<Order> orderStatusList = orderServicePort.getOrderByStatus(status, page, size, sortBy, sortDir);
 
         return orderRequestMapper.toPageResultResponse(orderStatusList);
@@ -59,4 +57,6 @@ public class OrderHandler implements IOrderHandler {
 
         orderServicePort.updateOrderToCanceled(id);
     }
+
+
 }

@@ -1,18 +1,16 @@
 package com.plaza.plazoleta.domain.usercase;
 
-import com.plaza.plazoleta.domain.spi.INotificationPersistencePort;
-import com.plaza.plazoleta.domain.spi.IOrderPersistencePort;
+import com.plaza.plazoleta.domain.exception.OrderUserCaseValidationException;
+import com.plaza.plazoleta.domain.spi.*;
 import com.plaza.plazoleta.domain.exception.ExceptionResponse;
 import com.plaza.plazoleta.domain.exception.OrderValidationException;
 import com.plaza.plazoleta.domain.model.*;
-import com.plaza.plazoleta.domain.spi.IUserPersistencePort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.domain.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +29,11 @@ class OrderUserCaseTest {
     private IUserPersistencePort userPersistencePort;
     @Mock
     private INotificationPersistencePort notificatoinPersistencePort;
+    @Mock
+    private ITraceabilityPersistencePort traceabilityPersistencePort;
+    @Mock
+    private IRestaurantPersistencePort restaurantPersistencePort;
+
     @InjectMocks
     private OrderUserCase orderUserCase;
 
@@ -38,32 +41,48 @@ class OrderUserCaseTest {
     private int page;
     private int size;
     private String sortBy;
-    private Pageable pageable;
-    private Sort sort;
     private String sortDir;
     private Order order;
+
+    private Restaurant restaurant;
+
+    private PageResult<Order> pageResultOrder;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        //creacion del mock de usuarios
-        user = new User(Role.OWNER.name(), 9L, 19L, "+573155828235");
+        user = new User(Role.OWNER.name(), 9L, 19L, "+573155828235", "Cristian", "Botina");
 
         page = 0;
         size = 2;
         sortBy = "id";
-        sort = Sort.by(Sort.Direction.ASC , sortBy);
         sortDir = "ASC";
-        pageable = PageRequest.of(page, size, sort);
 
-        Restaurant restaurant = new Restaurant();
-        restaurant.setName("restarante");
+        restaurant = new Restaurant();
+        restaurant.setName("Restaurante");
+        restaurant.setNumberId(1143826302L);
+        restaurant.setUserId(9L);
+        restaurant.setAddress("Avenida siempre viva");
+        restaurant.setPhoneNumber("+573155763456");
+        restaurant.setUrlLogo("hhpt:");
 
         List<OrderDetail> orderDetailList = new ArrayList<>();
         OrderDetail orderDetail = new OrderDetail(1L, 2);
         orderDetailList.add(orderDetail);
-        order = new Order(1L, user, restaurant, Status.PENDIENTE, orderDetailList, null, null);
+        order = new Order(1L, user, restaurant, Status.PENDIENTE, orderDetailList, 9L, null, null, null);
+
+        List<Order> testOrders = new ArrayList<>();
+        testOrders.add(order);
+        testOrders.add(order);
+
+        pageResultOrder = new PageResult<>();
+        pageResultOrder.setContent(testOrders);
+        pageResultOrder.setPageNumber(1);
+        pageResultOrder.setPageSize(1);
+        pageResultOrder.setTotalPages(1);
+        pageResultOrder.setLast(true);
+        pageResultOrder.setTotalElements(1);
     }
 
     @Test
@@ -87,8 +106,6 @@ class OrderUserCaseTest {
     @Test
     void saveOrder() {
 
-        Optional<Order> orderNotAvailable = Optional.of(order);
-
         List<Status> invalidStatusList = List.of(Status.EN_PREPARACION, Status.PENDIENTE, Status.LISTO);
         Mockito.when(userPersistencePort.getUseAuth()).thenReturn(user);
         Mockito.when(orderPersistencePort.findByCustomerAndStatusInvalid(user.getIdUser(), invalidStatusList)).thenReturn(Optional.empty());
@@ -101,16 +118,9 @@ class OrderUserCaseTest {
     void getOrderByStatus() {
         Status statusEnum = Status.valueOf("PENDIENTE");
         Mockito.when(userPersistencePort.getUseAuth()).thenReturn(user);
-
-        List<Order> testOrders = new ArrayList<>();
-        testOrders.add(order);
-        testOrders.add(order);
-        Page<Order> orderPage = new PageImpl<>(testOrders, pageable, testOrders.size());
-        //Mockito.when(orderPersistencePort.getOrderByStatus(user.getIdRestaurantEmployee(), statusEnum, page, size, sortBy, sortDir )).thenReturn(orderPage);
-
-        //Page<Order> orderPageReturn = orderUserCase.getOrderByStatus(statusEnum.toString(), page, size, sortBy, sortDir);
-
-        //assertEquals(2, orderPageReturn.getContent().size());
+        Mockito.when(orderPersistencePort.getOrderByStatus(user.getIdRestaurantEmployee(), statusEnum, page, size, sortBy, sortDir )).thenReturn(pageResultOrder);
+        PageResult<Order> orderPageReturn = orderUserCase.getOrderByStatus(statusEnum.toString(), page, size, sortBy, sortDir);
+        assertEquals(2, orderPageReturn.getContent().size());
 
     }
 
@@ -119,12 +129,12 @@ class OrderUserCaseTest {
     void updateOrderToCanceled() {
 
         Mockito.when(orderPersistencePort.finById(anyLong())).thenReturn(Optional.of(order));
-        Mockito.when(userPersistencePort.getById(anyLong())).thenReturn(user);
-        doNothing().when(orderPersistencePort).UpdateStatusOrder(anyLong(), any());
-
+        Mockito.when(userPersistencePort.getById(9L)).thenReturn(user);
+        doNothing().when(orderPersistencePort).updateStatusOrder(any());
+        Mockito.when(userPersistencePort.getUseAuth()).thenReturn(user);
         orderUserCase.updateOrderToCanceled(anyLong());
 
-        verify(orderPersistencePort).UpdateStatusOrder(anyLong(), any());
+        verify(orderPersistencePort).updateStatusOrder(any());
 
     }
 
@@ -133,12 +143,13 @@ class OrderUserCaseTest {
         order.setStatus(Status.ENTREGADO);
         Mockito.when(orderPersistencePort.finById(anyLong())).thenReturn(Optional.of(order));
         Mockito.when(userPersistencePort.getById(anyLong())).thenReturn(user);
-        doNothing().when(orderPersistencePort).UpdateStatusOrder(anyLong(), any());
+        Mockito.when(userPersistencePort.getUseAuth()).thenReturn(user);
+        doNothing().when(orderPersistencePort).updateStatusOrder(any());
         doNothing().when(notificatoinPersistencePort).sendMessage(any());
 
-        OrderValidationException exception = assertThrows(OrderValidationException.class, () -> {
-            orderUserCase.updateOrderToCanceled(anyLong());
-        });
+        OrderValidationException exception = assertThrows(OrderValidationException.class, () ->
+            orderUserCase.updateOrderToCanceled(anyLong())
+        );
 
         assertEquals(ExceptionResponse.ORDER_VALIDATION_NOT_IS_PENDING.getMessage(), exception.getMessage());
 
@@ -148,10 +159,25 @@ class OrderUserCaseTest {
     void updateOrderToDelivered() {
         order.setStatus(Status.LISTO);
         order.setPin("123456");
+        order.getRestaurant().setId(1L);
+        order.setEmployeeAsignedId(2L);
+        user.setIdRestaurantEmployee(1L);
+
+        User userEmploye = user;
+        userEmploye.setIdUser(2L);
+        userEmploye.setRol(Role.EMPLOYEE.name());
+        userEmploye.setIdRestaurantEmployee(1L);
+        userEmploye.setName("pedro");
+        userEmploye.setLastName("perez");
+        userEmploye.setPhoneNumber("+573433434");
+        Mockito.when(userPersistencePort.getById(9L)).thenReturn(user);
+        Mockito.when(userPersistencePort.getById(2L)).thenReturn(userEmploye);
         Mockito.when(orderPersistencePort.finByPin(anyString())).thenReturn(Optional.of(order));
-        doNothing().when(orderPersistencePort).UpdateStatusOrder(anyLong(), any());
+        doNothing().when(orderPersistencePort).updateStatusOrder(any());
+        Mockito.when(userPersistencePort.getUseAuth()).thenReturn(user);
+
         orderUserCase.updateOrderToDelivered(order);
-        verify(orderPersistencePort).UpdateStatusOrder(anyLong(), any());
+        verify(orderPersistencePort).updateStatusOrder(any());
 
     }
 
@@ -181,12 +207,16 @@ class OrderUserCaseTest {
     @Test
     void updateOrderToReady() {
         order.setPin("123456");
+        order.getRestaurant().setId(1L);
+        order.setEmployeeAsignedId(9L);
+        user.setIdRestaurantEmployee(1L);
         Mockito.when(orderPersistencePort.finById(anyLong())).thenReturn(Optional.of(order));
         Mockito.when(userPersistencePort.getById(anyLong())).thenReturn(user);
-        doNothing().when(orderPersistencePort).UpdateStatusOrder(anyLong(), any());
+        Mockito.when(userPersistencePort.getUseAuth()).thenReturn(user);
+        doNothing().when(orderPersistencePort).updateStatusOrder(any());
         doNothing().when(notificatoinPersistencePort).sendMessage(any());
         orderUserCase.updateOrderToReady(anyLong());
-        verify(orderPersistencePort).UpdateStatusOrder(anyLong(), any());
+        verify(orderPersistencePort).updateStatusOrder(any());
 
     }
 
@@ -205,11 +235,17 @@ class OrderUserCaseTest {
     @Test
     void updateOrderToPreparation() {
 
+        order.getRestaurant().setId(1L);
+        order.setEmployeeAsignedId(9L);
+        user.setIdRestaurantEmployee(1L);
+
         Mockito.when(orderPersistencePort.finById(anyLong())).thenReturn(Optional.of(order));
-        Mockito.when(userPersistencePort.getUseAuth()).thenReturn(user);//
+        Mockito.when(userPersistencePort.getUseAuth()).thenReturn(user);
+        Mockito.when(userPersistencePort.getById(anyLong())).thenReturn(user);
+        Mockito.when(traceabilityPersistencePort.insertTraceability(any())).thenReturn(true);
 
         orderUserCase.updateOrderToPreparation(1L);
-        verify(orderPersistencePort).UpdateStatusOrder(anyLong(), any());
+        verify(orderPersistencePort).updateStatusOrder(any());
 
     }
 
@@ -217,7 +253,7 @@ class OrderUserCaseTest {
     void updateOrderToPreparationWhenOrderIsNotFound() {
 
         Mockito.when(orderPersistencePort.finById(1L)).thenReturn(Optional.empty());
-        Mockito.when(userPersistencePort.getUseAuth()).thenReturn(user);//
+        Mockito.when(userPersistencePort.getUseAuth()).thenReturn(user);
 
         OrderValidationException exception = assertThrows(OrderValidationException.class, () -> {
             orderUserCase.updateOrderToPreparation(1L);
@@ -225,4 +261,25 @@ class OrderUserCaseTest {
         assertEquals(ExceptionResponse.ORDER_VALIDATION_NOT_FOUND.getMessage(), exception.getMessage());
 
     }
+
+
+    @Test
+    void saveOrderWhenRestaurantIsEmpty() {
+        order.setRestaurant(null);
+        OrderUserCaseValidationException exception = assertThrows(OrderUserCaseValidationException.class, () -> {
+            orderUserCase.saveOrder(order);
+        });
+        assertEquals(ExceptionResponse.ORDER_VALIATION_RESTAURANT.getMessage(), exception.getMessage());
+    }
+
+    @Test
+    void saveOrderWhenOrderDetailIsEmpty() {
+        order.setOrderDetailList(null);
+        OrderUserCaseValidationException exception = assertThrows(OrderUserCaseValidationException.class, () -> {
+            orderUserCase.saveOrder(order);
+        });
+        assertEquals(ExceptionResponse.ORDER_VALIATION_DETAIL.getMessage(), exception.getMessage());
+    }
+
+
 }

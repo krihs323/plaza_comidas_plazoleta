@@ -1,15 +1,14 @@
 package com.plaza.plazoleta.application.mapper;
 
-import com.plaza.plazoleta.application.dto.OrderDeliverRequest;
-import com.plaza.plazoleta.application.dto.OrderRequest;
-import com.plaza.plazoleta.application.dto.OrderResponse;
-import com.plaza.plazoleta.application.dto.PageResultResponse;
+import com.plaza.plazoleta.application.dto.*;
 import com.plaza.plazoleta.domain.model.Order;
+import com.plaza.plazoleta.domain.model.OrderReport;
 import com.plaza.plazoleta.domain.model.PageResult;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
-import org.springframework.data.domain.Page;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
@@ -27,6 +26,9 @@ public interface OrderRequestMapper {
 
     Order toOrder(OrderDeliverRequest orderDeliverRequest);
 
-
     PageResult<OrderResponse> toPageResultResponse(PageResult<Order> pageResult);
+
+    List<OrderReportEmployeeResponse> toOrderReportEmployeeResponse(List<OrderReport> orderReportList);
+
+    List<OrderReportResponse> toOrderReportResponse(List<OrderReport> orderReportList);
 }

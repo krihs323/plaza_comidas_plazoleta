@@ -14,9 +14,7 @@ public interface RestaurantRequestMapper {
 
     Restaurant toRestaurant(RestaurantRequest restaurantRequest);
 
-
     RestaurantListResponse toRestaurantListRespones(Restaurant restaurant);
-
 
     PageResult<RestaurantListResponse> toPageResultResponse(PageResult<Restaurant> pageResult);
 }

@@ -21,7 +21,6 @@ public class TraceabilityClientAdapter implements ITraceabilityPersistencePort {
     @Override
     public Boolean insertTraceability(Traceability traceability) {
         String authorizationHeader = httpServletRequest.getHeader("Authorization");
-
         traceabilityFeignClient.saveTraceability(traceabilityEntityMapper.toTrceabilityEntity(traceability), authorizationHeader);
         return true;
     }

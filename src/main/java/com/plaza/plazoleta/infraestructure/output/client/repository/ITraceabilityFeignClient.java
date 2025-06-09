@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 public interface ITraceabilityFeignClient {
 
     @PostMapping("/api/trazabilidad/create/")
-    String saveTraceability(@RequestBody TraceabilityEntity traceabilityEntity, @RequestHeader("Authorization") String authorizationHeader);
+    void saveTraceability(@RequestBody TraceabilityEntity traceabilityEntity, @RequestHeader("Authorization") String authorizationHeader);
 
 }

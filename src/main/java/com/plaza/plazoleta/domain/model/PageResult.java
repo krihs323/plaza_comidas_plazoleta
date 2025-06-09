@@ -11,6 +11,9 @@ public class PageResult<T> {
     private int totalPages;
     private boolean last;
 
+    public PageResult() {
+    }
+
     public PageResult(List<T> content, int pageNumber, int pageSize, long totalElements, int totalPages, boolean last) {
         this.content = content;
         this.pageNumber = pageNumber;

@@ -22,7 +22,14 @@ public enum ExceptionResponse {
     ORDER_VALIATION_RESTAURANT("Debe ingresar un restaurante"),
     ORDER_VALIATION_DETAIL("Debe ingresar el detalle"),
     ORDER_VALIDATION_NOT_IS_READY("Solo el pedido en estado Listo puede pasar a estado Entregado"),
-    ORDER_VALIDATION_NOT_IS_PENDING("Solo se pueden cancelar pedidos que se encuentren en estado Pendiente");
+    ORDER_VALIDATION_NOT_IS_PENDING("Solo se pueden cancelar pedidos que se encuentren en estado Pendiente"),
+    MENU_VALIATION_NOT_FOUND("No se encontró el Plato que intenta modificar"),
+    ORDER_OWNER_RESTAURANT_NOT_FOUND("El propietario no tiene un restaurante asignado"),
+    ORDER_VALIATION_DETAIL_MENU_IS_NULL("El plato debe ir presente en el detalle del pedido"),
+    ORDER_LIST_STATUS_IS_EMPTY("Debe ingresar el estado por el cual desea filtrar"),
+    ORDER_VALIDATION_ORDER_NOT_ASIGNED_TO_EMPLOYEE("La orden que intenta modificar no esta asignada al empleado autenticado"),
+    ORDER_VALIDATION_ORDER_NOT_ASIGNED_TO_RESTAURANT_EMPLOYEE("La orden que intenta modificar no esta asignada a su restaurante"),
+    ORDER_VALIDATION_CUSTOMER_NOTALLOWED("Solo puede cancelar pedidos solicitados por el cliente");
 
     private String message;
 

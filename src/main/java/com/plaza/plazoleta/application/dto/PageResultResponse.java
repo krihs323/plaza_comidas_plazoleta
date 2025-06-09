@@ -1,6 +1,5 @@
 package com.plaza.plazoleta.application.dto;
 
-import com.plaza.plazoleta.domain.model.Status;
 import lombok.Getter;
 import lombok.Setter;
 

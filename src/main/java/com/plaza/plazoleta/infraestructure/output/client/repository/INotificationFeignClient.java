@@ -8,6 +8,6 @@ import org.springframework.web.bind.annotation.*;
 public interface INotificationFeignClient {
 
     @PostMapping("/api/notification/send/")
-    String sendMessage(@RequestBody MessageModel messageNotification, @RequestHeader("Authorization") String authorizationHeader);
+    void sendMessage(@RequestBody MessageModel messageNotification, @RequestHeader("Authorization") String authorizationHeader);
 
 }

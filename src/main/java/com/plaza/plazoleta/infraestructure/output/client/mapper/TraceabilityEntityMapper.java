@@ -10,7 +10,5 @@ import org.mapstruct.ReportingPolicy;
         unmappedSourcePolicy = ReportingPolicy.IGNORE)
 public interface TraceabilityEntityMapper {
 
-    Traceability toTraeability(TraceabilityEntityMapper traceabilityEntityMapper);
-
     TraceabilityEntity toTrceabilityEntity(Traceability traceability);
 }

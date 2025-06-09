@@ -10,6 +10,10 @@ public class User {
 
     private String phoneNumber;
 
+    private String name;
+
+    private String lastName;
+
     public User() {
     }
 
@@ -24,11 +28,13 @@ public class User {
         this.idRestaurantEmployee = idRestaurantEmployee;
     }
 
-    public User(String rol, Long idUser, Long idRestaurantEmployee, String phoneNumber) {
+    public User(String rol, Long idUser, Long idRestaurantEmployee, String phoneNumber, String name, String lastName) {
         this.rol = rol;
         this.idUser = idUser;
         this.idRestaurantEmployee = idRestaurantEmployee;
         this.phoneNumber = phoneNumber;
+        this.name = name;
+        this.lastName = lastName;
     }
 
     public String getRol() {
@@ -61,5 +67,21 @@ public class User {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }

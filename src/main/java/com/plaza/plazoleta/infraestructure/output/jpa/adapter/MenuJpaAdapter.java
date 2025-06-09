@@ -3,7 +3,6 @@ package com.plaza.plazoleta.infraestructure.output.jpa.adapter;
 import com.plaza.plazoleta.domain.model.Menu;
 import com.plaza.plazoleta.domain.model.PageResult;
 import com.plaza.plazoleta.domain.spi.IMenuPersistencePort;
-import com.plaza.plazoleta.infraestructure.exception.MenuNotFoundException;
 import com.plaza.plazoleta.infraestructure.output.jpa.entity.MenuEntity;
 import com.plaza.plazoleta.infraestructure.output.jpa.mapper.MenuEntityMapper;
 import com.plaza.plazoleta.infraestructure.output.jpa.repository.IMenuRepository;
@@ -26,22 +25,16 @@ public class MenuJpaAdapter implements IMenuPersistencePort {
         this.menuEntityMapper = menuEntityMapper;
     }
 
+    //TODO Repeticion de codigo con el saveMenu - Ajustado
     @Override
     public void saveMenu(Menu menu) {
         menuRepository.save(menuEntityMapper.toEntity(menu));
     }
 
     @Override
-    public void updateMenu(Long id, Menu menu) {
-        MenuEntity menuNew = menuEntityMapper.toEntity(menu);
-        menuRepository.save(menuNew);
-    }
-
-    @Override
     public Optional<Menu> findById(Long id) {
         Optional<MenuEntity> menuEntity = menuRepository.findById(id);
-        return Optional.ofNullable(menuEntityMapper.toMenu(menuEntity.orElseThrow(() -> new MenuNotFoundException("No se encontró el Plato que intenta modificar"))));
-
+        return menuEntity.map(menuEntityMapper::toMenu);
     }
 
     @Override
@@ -49,11 +42,11 @@ public class MenuJpaAdapter implements IMenuPersistencePort {
         Sort sort = Sort.by(Sort.Direction.ASC , sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<MenuEntity> menuRepositoryListByRestaurant = null;
+        Page<MenuEntity> menuRepositoryListByRestaurant;
         if (idCategory==null){
-           menuRepositoryListByRestaurant = menuRepository.findByRestaurantEntityId(idRestaurant, pageable);
+           menuRepositoryListByRestaurant = menuRepository.findByRestaurantEntityIdAndActive(idRestaurant, true, pageable);
         } else {
-            menuRepositoryListByRestaurant = menuRepository.findByRestaurantEntityIdAndCategoryEntityId(idRestaurant, idCategory, pageable);
+            menuRepositoryListByRestaurant = menuRepository.findByRestaurantEntityIdAndCategoryEntityIdAndActive(idRestaurant, idCategory, true, pageable);
         }
 
 
@@ -61,7 +54,7 @@ public class MenuJpaAdapter implements IMenuPersistencePort {
                 .getContent()
                 .stream()
                 .map(menuEntityMapper::toMenu)
-                .collect(Collectors.toList());
+                .toList();
 
         return new PageResult<>(
                 domainMenus,

@@ -8,8 +8,6 @@ import com.plaza.plazoleta.application.mapper.MenuRequestMapper;
 import com.plaza.plazoleta.domain.api.IMenuServicePort;
 import com.plaza.plazoleta.domain.model.Menu;
 import com.plaza.plazoleta.domain.model.PageResult;
-import com.plaza.plazoleta.domain.model.Restaurant;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,7 +45,6 @@ public class MenuHandler implements IMenuHandler {
     @Override
     public PageResult<MenuResponse> getMenuByRestaurant(Long idRestaurant, String idCategory, int page, int size, String sortBy, String sortDir) {
         PageResult<Menu> menuList = menuServicePort.getMenuByRestaurant(idRestaurant, idCategory, page, size, sortBy, sortDir);
-        //return menuList.map(menuRequestMapper::toMenuListResponse);
         return menuRequestMapper.toPageResultResponse(menuList);
 
     }

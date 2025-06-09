@@ -2,7 +2,7 @@ package com.plaza.plazoleta.domain.api;
 
 import com.plaza.plazoleta.domain.model.Order;
 import com.plaza.plazoleta.domain.model.PageResult;
-import org.springframework.data.domain.Page;
+
 
 public interface IOrderServicePort {
     void saveOrder(Order order);
@@ -16,4 +16,5 @@ public interface IOrderServicePort {
     void updateOrderToDelivered(Order order);
 
     void updateOrderToCanceled(Long id);
+
 }

@@ -6,8 +6,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.HttpServletRequest;
-import org.mapstruct.control.MappingControl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -37,7 +35,7 @@ public class JwtService {
 
     public String generateToken(String username, String role) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", role); // Agrega el rol a los claims
+        claims.put("role", role);
         return createToken(claims, username);
     }
 
@@ -65,7 +63,6 @@ public class JwtService {
                 .map(GrantedAuthority::getAuthority);
         extraClaims.put("role", roles.orElseThrow());
 
-        //return buildToken(extraClaims, userDetails, jwtExpiration);
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
@@ -82,8 +79,6 @@ public class JwtService {
             Jwts.parserBuilder().setSigningKey(getSignInKey()).build().parseClaimsJws(token);
             return !isTokenExpired(token);
         } catch (Exception e) {
-            // Logear la excepción para debugging (por ejemplo, token inválido, expirado, etc.)
-            System.out.println("Error al validar el token: " + e.getMessage());
             return false;
         }
     }

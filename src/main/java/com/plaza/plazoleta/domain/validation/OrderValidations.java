@@ -15,6 +15,20 @@ public class OrderValidations extends Validate {
             throw new OrderUserCaseValidationException(ExceptionResponse.ORDER_VALIATION_DETAIL.getMessage());
         }
 
+        long orderDetail = order.getOrderDetailList().stream().filter(detail -> detail.getIdMenu()==null).count();
+        if (orderDetail>0) {
+            throw new OrderUserCaseValidationException(ExceptionResponse.ORDER_VALIATION_DETAIL_MENU_IS_NULL.getMessage());
+        }
+
+        long totalAmount = order.getOrderDetailList().stream().filter(detail -> detail.getAmount()==null).count();
+        if (totalAmount>0) {
+            throw new OrderUserCaseValidationException(ExceptionResponse.ORDER_VALIATION_DETAIL_MENU_IS_NULL.getMessage());
+        }
     }
 
+    public static void getORderByStatus(String status) {
+        if (status.isEmpty()) {
+            throw new OrderUserCaseValidationException(ExceptionResponse.ORDER_LIST_STATUS_IS_EMPTY.getMessage());
+        }
+    }
 }

@@ -14,13 +14,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 
 class OrderJpaAdapterTest {
@@ -37,10 +38,12 @@ class OrderJpaAdapterTest {
     private OrderJpaAdapter orderJpaAdapter;
 
     private OrderEntity orderEntity;
-    private OrderDetailEntity orderDetailEntity;
     private MenuEntity menuEntity;
     private Order order;
-    private User user;
+    private int page;
+    private int size;
+    private String sortBy;
+    private Pageable pageable;
 
     @BeforeEach
     void setUp() {
@@ -51,7 +54,7 @@ class OrderJpaAdapterTest {
         orderEntity.setId(1L);
         orderEntity.setStatus(Status.PENDIENTE);
 
-        orderDetailEntity = new OrderDetailEntity();
+        OrderDetailEntity orderDetailEntity = new OrderDetailEntity();
         orderDetailEntity.setId(1L);
         orderDetailEntity.setAmount(1);
 
@@ -65,17 +68,22 @@ class OrderJpaAdapterTest {
         menuEntity.setId(1L);
         menuEntity.setPrice(1000L);
 
-        user = new User(Role.OWNER.name(), 9L, 19L, "+573155828235");
-
+        User user = new User(Role.OWNER.name(), 9L, 1L, "+573155828235", "Cristian", "Botina");
 
         Restaurant restaurant = new Restaurant();
         restaurant.setName("restarante");
+        restaurant.setUserId(1L);
 
         List<OrderDetail> orderDetailList = new ArrayList<>();
         OrderDetail orderDetail = new OrderDetail(1L, 2);
         orderDetailList.add(orderDetail);
-        order = new Order(1L, user, restaurant, Status.PENDIENTE, orderDetailList, null, null);
+        order = new Order(1L, user, restaurant, Status.PENDIENTE, orderDetailList, null, null, null, null);
 
+        page = 0;
+        size = 2;
+        sortBy = "id";
+        Sort sort = Sort.by(Sort.Direction.ASC , sortBy);
+        pageable = PageRequest.of(page, size, sort);
     }
 
     @Test
@@ -92,21 +100,58 @@ class OrderJpaAdapterTest {
 
     @Test
     void findByCustomerAndStatusInvalid() {
+
+        Mockito.when(orderRepository.findByCustomerIdAndStatusIn(anyLong(), any())).thenReturn(Optional.of(orderEntity));
+        Mockito.when(orderEntityMapper.toOrder(any())).thenReturn(order);
+
+        Optional<Order> orderResponse = orderJpaAdapter.findByCustomerAndStatusInvalid(anyLong(), any());
+        assertEquals(orderResponse.get().getId(), orderResponse.get().getId());
+
     }
 
     @Test
     void getOrderByStatus() {
+        List<OrderEntity> testOrders = new ArrayList<>();
+        OrderEntity orderEntityMock = new OrderEntity();
+        orderEntityMock.setId(1L);
+        orderEntityMock.setStatus(Status.PENDIENTE);
+        testOrders.add(orderEntityMock);
+        testOrders.add(orderEntityMock);
+
+        Page<OrderEntity> menusPage = new PageImpl<>(testOrders, pageable, testOrders.size());
+
+        Mockito.when(orderRepository.findByRestaurantEntityIdAndStatus(1L, Status.PENDIENTE, pageable)).thenReturn(menusPage);
+
+        PageResult<Order> menuPageReturn = orderJpaAdapter.getOrderByStatus(1L, Status.PENDIENTE, page, size, sortBy, "ASC");
+        assertEquals(2, menuPageReturn.getContent().size());
     }
 
     @Test
     void updateStatusOrder() {
+        Mockito.when(orderEntityMapper.toEntity(any())).thenReturn(orderEntity);
+        Mockito.when(orderRepository.save(orderEntity)).thenReturn(orderEntity);
+        orderJpaAdapter.updateStatusOrder(order);
+        verify(orderRepository).save(any());
     }
 
     @Test
     void finByPin() {
+
+        Mockito.when(orderRepository.findByPinContaining(anyString())).thenReturn(Optional.of(orderEntity));
+        Mockito.when(orderEntityMapper.toOrder(any())).thenReturn(order);
+
+        Optional<Order> orderResponse = orderJpaAdapter.finByPin(anyString());
+        assertEquals(orderResponse.get().getId(), orderResponse.get().getId());
     }
 
     @Test
     void finById() {
+
+        Mockito.when(orderRepository.findById(anyLong())).thenReturn(Optional.of(orderEntity));
+        Mockito.when(orderEntityMapper.toOrder(any())).thenReturn(order);
+
+        Optional<Order> orderResponse = orderJpaAdapter.finById(anyLong());
+        assertEquals(orderResponse.get().getId(), orderResponse.get().getId());
     }
+
 }
