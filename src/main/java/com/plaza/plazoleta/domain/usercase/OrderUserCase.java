@@ -7,6 +7,7 @@ import com.plaza.plazoleta.domain.model.*;
 import com.plaza.plazoleta.domain.exception.OrderValidationException;
 import com.plaza.plazoleta.domain.exception.ExceptionResponse;
 import com.plaza.plazoleta.domain.validation.OrderValidations;
+import com.plaza.plazoleta.domain.exception.MenuNotFoundException;
 
 import java.util.Date;
 import java.util.List;
@@ -19,15 +20,16 @@ public class OrderUserCase implements IOrderServicePort {
     private final IUserPersistencePort userPersistencePort;
     private final INotificationPersistencePort notificationPersistencePort;
     private final ITraceabilityPersistencePort traceabilityPersistencePort;
-    private final IRestaurantPersistencePort restaurantPersistencePort;
+    private final IMenuPersistencePort menuPersistencePort;
 
-    public OrderUserCase(IOrderPersistencePort orderPersistencePort, IUserPersistencePort userPersistencePort, INotificationPersistencePort notificationPersistencePort, ITraceabilityPersistencePort traceabilityPersistencePort, IRestaurantPersistencePort restaurantPersistencePort) {
+    public OrderUserCase(IOrderPersistencePort orderPersistencePort, IUserPersistencePort userPersistencePort, INotificationPersistencePort notificationPersistencePort, ITraceabilityPersistencePort traceabilityPersistencePort, IMenuPersistencePort menuPersistencePort) {
         this.orderPersistencePort = orderPersistencePort;
         this.userPersistencePort = userPersistencePort;
         this.notificationPersistencePort = notificationPersistencePort;
         this.traceabilityPersistencePort = traceabilityPersistencePort;
-        this.restaurantPersistencePort = restaurantPersistencePort;
+        this.menuPersistencePort = menuPersistencePort;
     }
+
 
     @Override
     public void saveOrder(Order order) {
@@ -39,6 +41,14 @@ public class OrderUserCase implements IOrderServicePort {
             throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_NOT_VALID.getMessage());
         }
 
+        for (OrderDetail req : order.getOrderDetailList()) {
+            //TODO Validacion de dominio de los platos - AJUSTADO
+            Optional<Menu> menuToValidate = menuPersistencePort.findById(req.getIdMenu());
+            if (menuToValidate.isEmpty()) {
+                throw new MenuNotFoundException(ExceptionResponse.RESTAURANT_VALIDATION_NOT_FOUND.getMessage());
+            }
+        }
+
         order.setStatus(Status.PENDIENTE);
         order.setCustomer(user);
         orderPersistencePort.saveOrder(order);
@@ -46,6 +56,7 @@ public class OrderUserCase implements IOrderServicePort {
 
     @Override
     public PageResult<Order> getOrderByStatus(String status, int page, int size, String sortBy, String sortDir) {
+        OrderValidations.getORderByStatus(status);
         User user = userPersistencePort.getUseAuth();
         Status statusEnum = Status.valueOf(status);
         return orderPersistencePort.getOrderByStatus(user.getIdRestaurantEmployee(), statusEnum, page, size, sortBy, sortDir);
@@ -56,29 +67,17 @@ public class OrderUserCase implements IOrderServicePort {
         User user = userPersistencePort.getUseAuth();
 
         Optional<Order> orderToUpdateStatus = orderPersistencePort.finById(id);
-        if (orderToUpdateStatus.isEmpty()){
-            throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_NOT_FOUND.getMessage());
-        }
-        if (!user.getIdRestaurantEmployee().equals(orderToUpdateStatus.get().getRestaurant().getId())) {
-            throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_ORDER_NOT_ASIGNED_TO_EMPLOYEE.getMessage());
-        }
+        isOrderValid(orderToUpdateStatus);
+        isUserAsignedToEmployee(user.getIdRestaurantEmployee(), orderToUpdateStatus.get().getRestaurant().getId());
 
         Date dateNow = new Date();
-        Status statusBeore = orderToUpdateStatus.get().getStatus();
+        Status statusBefore = orderToUpdateStatus.get().getStatus();
         orderToUpdateStatus.get().setEmployeeAsignedId(user.getIdUser());
         orderToUpdateStatus.get().setStatus(Status.EN_PREPARACION);
         orderToUpdateStatus.get().setStartDate(dateNow);
         orderPersistencePort.updateStatusOrder(orderToUpdateStatus.orElseThrow());
 
-        User userCustomer = userPersistencePort.getById(orderToUpdateStatus.get().getCustomer().getIdUser());
-        User userEmployee = userPersistencePort.getById(orderToUpdateStatus.get().getEmployeeAsignedId());
-        String customerName = userCustomer.getName().concat(" ").concat(userCustomer.getLastName());
-        String restaurantName = orderToUpdateStatus.get().getRestaurant().getName();
-        Long idRestaurant = orderToUpdateStatus.get().getRestaurant().getId();
-        String employeeName = userEmployee.getName().concat(" ").concat(userEmployee.getLastName());
-        Long idEmployee = userEmployee.getIdUser();
-        Traceability traceability = new Traceability(id, orderToUpdateStatus.get().getCustomer().getIdUser(), statusBeore, Status.EN_PREPARACION, dateNow, customerName, restaurantName, idRestaurant, employeeName, idEmployee);
-        traceabilityPersistencePort.insertTraceability(traceability);
+        saveTraceability(orderToUpdateStatus.get(), statusBefore, Status.EN_PREPARACION, dateNow);
 
     }
 
@@ -86,36 +85,20 @@ public class OrderUserCase implements IOrderServicePort {
     public void updateOrderToReady(Long id) {
 
         Optional<Order> orderToUpdateStatus = orderPersistencePort.finById(id);
-        if (orderToUpdateStatus.isEmpty()){
-            throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_NOT_FOUND.getMessage());
-        }
+        isOrderValid(orderToUpdateStatus);
         User userAuth = userPersistencePort.getUseAuth();
-        if (!userAuth.getIdRestaurantEmployee().equals(orderToUpdateStatus.get().getRestaurant().getId())) {
-            throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_ORDER_NOT_ASIGNED_TO_RESTAURANT_EMPLOYEE.getMessage());
-        }
+        //TODO Separar las validaciones repetidas como en utils, o metodo estatico - AJUSTADO
+        isUserAsignedToEmployee(userAuth.getIdRestaurantEmployee(), orderToUpdateStatus.get().getRestaurant().getId());
         if (!userAuth.getIdUser().equals(orderToUpdateStatus.get().getEmployeeAsignedId())) {
             throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_ORDER_NOT_ASIGNED_TO_EMPLOYEE.getMessage());
         }
-        Status statusBeore = orderToUpdateStatus.get().getStatus();
+        Status statusBefore = orderToUpdateStatus.get().getStatus();
         orderToUpdateStatus.get().setStatus(Status.LISTO);
         orderToUpdateStatus.get().setPin(UUID.randomUUID().toString());
         orderPersistencePort.updateStatusOrder(orderToUpdateStatus.orElseThrow());
 
-        User user = userPersistencePort.getById(orderToUpdateStatus.get().getCustomer().getIdUser());
-        Message message = new Message(Constant.MESSAGE_PIN.getValue() + orderToUpdateStatus.get().getPin(), user.getPhoneNumber());
-        notificationPersistencePort.sendMessage(message);
-
-
-        User userCustomer = userPersistencePort.getById(orderToUpdateStatus.get().getCustomer().getIdUser());
-        User userEmployee = userPersistencePort.getById(orderToUpdateStatus.get().getEmployeeAsignedId());
-        String customerName = userCustomer.getName().concat(" ").concat(userCustomer.getLastName());
-        String restaurantName = orderToUpdateStatus.get().getRestaurant().getName();
-        Long idRestaurant = orderToUpdateStatus.get().getRestaurant().getId();
-        String employeeName = userEmployee.getName().concat(" ").concat(userEmployee.getLastName());
-        Long idEmployee = userEmployee.getIdUser();
-        Traceability traceability = new Traceability(id, orderToUpdateStatus.get().getCustomer().getIdUser(), statusBeore, Status.LISTO, new Date(), customerName, restaurantName, idRestaurant, employeeName, idEmployee);
-
-        traceabilityPersistencePort.insertTraceability(traceability);
+        sendNotification(orderToUpdateStatus.get(), Constant.MESSAGE_PIN.getValue() + orderToUpdateStatus.get().getPin());
+        saveTraceability(orderToUpdateStatus.get(), statusBefore, Status.LISTO, new Date());
 
     }
 
@@ -123,66 +106,74 @@ public class OrderUserCase implements IOrderServicePort {
     public void updateOrderToDelivered(Order order) {
 
         Optional<Order> orderToUpdateStatus = orderPersistencePort.finByPin(order.getPin());
-        if (orderToUpdateStatus.isEmpty()){
-            throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_NOT_FOUND.getMessage());
-        }
+        isOrderValid(orderToUpdateStatus);
         if(!orderToUpdateStatus.get().getStatus().equals(Status.LISTO)){
             throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_NOT_IS_READY.getMessage());
         }
         User userAuth = userPersistencePort.getUseAuth();
-        if (!userAuth.getIdRestaurantEmployee().equals(orderToUpdateStatus.get().getRestaurant().getId())) {
-            throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_ORDER_NOT_ASIGNED_TO_RESTAURANT_EMPLOYEE.getMessage());
-        }
+        isUserAsignedToEmployee(userAuth.getIdRestaurantEmployee(), orderToUpdateStatus.get().getRestaurant().getId());
         Date dateNow = new Date();
-        Status statusBeore = orderToUpdateStatus.get().getStatus();
+        Status statusBefore = orderToUpdateStatus.get().getStatus();
         orderToUpdateStatus.get().setEndDate(dateNow);
         orderToUpdateStatus.get().setStatus(Status.ENTREGADO);
         orderPersistencePort.updateStatusOrder(orderToUpdateStatus.orElseThrow());
 
-        User userCustomer = userPersistencePort.getById(orderToUpdateStatus.get().getCustomer().getIdUser());
-        User userEmployee = userPersistencePort.getById(orderToUpdateStatus.get().getEmployeeAsignedId());
-        String customerName = userCustomer.getName().concat(" ").concat(userCustomer.getLastName());
-        String restaurantName = orderToUpdateStatus.get().getRestaurant().getName();
-        Long idRestaurant = orderToUpdateStatus.get().getRestaurant().getId();
-        String employeeName = userEmployee.getName().concat(" ").concat(userEmployee.getLastName());
-        Long idEmployee = userEmployee.getIdUser();
-        Traceability traceability = new Traceability(orderToUpdateStatus.get().getId(), orderToUpdateStatus.get().getCustomer().getIdUser(), statusBeore, Status.ENTREGADO, dateNow, customerName, restaurantName, idRestaurant, employeeName, idEmployee);
+        saveTraceability(orderToUpdateStatus.get(), statusBefore, Status.ENTREGADO, dateNow);
 
-        traceabilityPersistencePort.insertTraceability(traceability);
     }
 
     @Override
     public void updateOrderToCanceled(Long id) {
 
         Optional<Order> orderToUpdateStatus = orderPersistencePort.finById(id);
-        if (orderToUpdateStatus.isEmpty()){
-            throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_NOT_FOUND.getMessage());
-        }
+        isOrderValid(orderToUpdateStatus);
         User userAuth = userPersistencePort.getUseAuth();
         if (!orderToUpdateStatus.get().getCustomer().getIdUser().equals(userAuth.getIdUser())) {
             throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_CUSTOMER_NOTALLOWED.getMessage());
         }
         if(!orderToUpdateStatus.get().getStatus().equals(Status.PENDIENTE)){
-            User user = userPersistencePort.getById(orderToUpdateStatus.get().getCustomer().getIdUser());
-            Message message = new Message(Constant.MESSAGE_ORDER_IN_PREPARATION.getValue(), user.getPhoneNumber());
-            notificationPersistencePort.sendMessage(message);
-
+            sendNotification(orderToUpdateStatus.get(), Constant.MESSAGE_ORDER_IN_PREPARATION.getValue());
             throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_NOT_IS_PENDING.getMessage());
         }
-        Status statusBeore = orderToUpdateStatus.get().getStatus();
+        Status statusBefore = orderToUpdateStatus.get().getStatus();
         orderToUpdateStatus.get().setStatus(Status.CANCELADO);
         orderPersistencePort.updateStatusOrder(orderToUpdateStatus.orElseThrow());
 
-        User userCustomer = userPersistencePort.getById(orderToUpdateStatus.get().getCustomer().getIdUser());
-        User userEmployee = userPersistencePort.getById(orderToUpdateStatus.get().getEmployeeAsignedId());
+        //TODO Codigo repetido, reacomodar a un metodo privado que resuelva -AJUSTADO
+        saveTraceability(orderToUpdateStatus.get(), statusBefore, Status.CANCELADO, new Date());
+
+    }
+
+    private void saveTraceability(Order order, Status statusBefore, Status statusAfter, Date date) {
+
+        User userCustomer = userPersistencePort.getById(order.getCustomer().getIdUser());
+        User userEmployee = userPersistencePort.getById(order.getEmployeeAsignedId());
         String customerName = userCustomer.getName().concat(" ").concat(userCustomer.getLastName());
-        String restaurantName = orderToUpdateStatus.get().getRestaurant().getName();
-        Long idRestaurant = orderToUpdateStatus.get().getRestaurant().getId();
+        String restaurantName = order.getRestaurant().getName();
+        Long idRestaurant = order.getRestaurant().getId();
         String employeeName = userEmployee.getName().concat(" ").concat(userEmployee.getLastName());
         Long idEmployee = userEmployee.getIdUser();
-        Traceability traceability = new Traceability(id, orderToUpdateStatus.get().getCustomer().getIdUser(), statusBeore, Status.CANCELADO, new Date(), customerName, restaurantName, idRestaurant, employeeName, idEmployee);
-
+        Traceability traceability = new Traceability(order.getId(), order.getCustomer().getIdUser(), statusBefore, statusAfter, date, customerName, restaurantName, idRestaurant, employeeName, idEmployee);
         traceabilityPersistencePort.insertTraceability(traceability);
+
+    }
+
+    private void isOrderValid(Optional<Order> order) {
+        if (order.isEmpty()){
+            throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_NOT_FOUND.getMessage());
+        }
+    }
+
+    private void isUserAsignedToEmployee(Long employeeIdRestaurantAssigned, Long orderIdRestaurant) {
+        if (!employeeIdRestaurantAssigned.equals(orderIdRestaurant)) {
+            throw new OrderValidationException(ExceptionResponse.ORDER_VALIDATION_ORDER_NOT_ASIGNED_TO_RESTAURANT_EMPLOYEE.getMessage());
+        }
+    }
+
+    private void sendNotification(Order order, String messageString) {
+        User user = userPersistencePort.getById(order.getCustomer().getIdUser());
+        Message message = new Message(messageString, user.getPhoneNumber());
+        notificationPersistencePort.sendMessage(message);
 
     }
 

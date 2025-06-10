@@ -1,4 +1,4 @@
-package com.plaza.plazoleta.infraestructure.exception;
+package com.plaza.plazoleta.domain.exception;
 
 public class MenuNotFoundException extends RuntimeException {
 

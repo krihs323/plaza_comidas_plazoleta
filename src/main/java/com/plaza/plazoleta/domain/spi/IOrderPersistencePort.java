@@ -1,7 +1,6 @@
 package com.plaza.plazoleta.domain.spi;
 
 import com.plaza.plazoleta.domain.model.Order;
-import com.plaza.plazoleta.domain.model.OrderReport;
 import com.plaza.plazoleta.domain.model.PageResult;
 import com.plaza.plazoleta.domain.model.Status;
 

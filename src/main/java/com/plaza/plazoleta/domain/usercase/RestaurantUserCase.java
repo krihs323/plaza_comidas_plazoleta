@@ -39,8 +39,9 @@ public class RestaurantUserCase implements IRestaurantServicePort {
     }
 
     @Override
-    public PageResult<Restaurant> getAllRestaurants(Integer pages) {
-        return restaurantPersistencePort.getAllRestaurants(pages);
+    //TODO Renombrar la variable pages por mas diciente numero de items - AJUSTADO
+    public PageResult<Restaurant> getAllRestaurants(Integer elementsByPage) {
+        return restaurantPersistencePort.getAllRestaurants(elementsByPage);
     }
 
 }

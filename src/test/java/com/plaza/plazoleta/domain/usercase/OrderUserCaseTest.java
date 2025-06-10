@@ -1,5 +1,6 @@
 package com.plaza.plazoleta.domain.usercase;
 
+import com.plaza.plazoleta.domain.exception.MenuNotFoundException;
 import com.plaza.plazoleta.domain.exception.OrderUserCaseValidationException;
 import com.plaza.plazoleta.domain.spi.*;
 import com.plaza.plazoleta.domain.exception.ExceptionResponse;
@@ -32,7 +33,8 @@ class OrderUserCaseTest {
     @Mock
     private ITraceabilityPersistencePort traceabilityPersistencePort;
     @Mock
-    private IRestaurantPersistencePort restaurantPersistencePort;
+    private IMenuPersistencePort menuPersistencePort;
+
 
     @InjectMocks
     private OrderUserCase orderUserCase;
@@ -45,8 +47,8 @@ class OrderUserCaseTest {
     private Order order;
 
     private Restaurant restaurant;
-
     private PageResult<Order> pageResultOrder;
+    private Menu menu;
 
     @BeforeEach
     void setUp() {
@@ -83,24 +85,33 @@ class OrderUserCaseTest {
         pageResultOrder.setTotalPages(1);
         pageResultOrder.setLast(true);
         pageResultOrder.setTotalElements(1);
+
+        Category category = new Category();
+        category.setId(1L);
+        category.setName("Comida Tipica");
+
+        menu = new Menu();
+        menu.setId(1L);
+        menu.setName("Pasta");
+        menu.setPrice(2000L);
+        menu.setDescription("Pasta al ajo");
+        menu.setUrlLogo("http");
+        menu.setCategory(category);
+        menu.setRestaurant(restaurant);
+        menu.setActive(true);
     }
 
     @Test
     void saveOrderWhenThereIsAStatusPending() {
 
         Optional<Order> orderNotAvailable = Optional.of(order);
-
         List<Status> invalidStatusList = List.of(Status.EN_PREPARACION, Status.PENDIENTE, Status.LISTO);
         Mockito.when(userPersistencePort.getUseAuth()).thenReturn(user);
         Mockito.when(orderPersistencePort.findByCustomerAndStatusInvalid(user.getIdUser(), invalidStatusList)).thenReturn(orderNotAvailable);
-
         OrderValidationException exception = assertThrows(OrderValidationException.class, () -> {
             orderUserCase.saveOrder(order);
         });
-
         assertEquals(ExceptionResponse.ORDER_VALIDATION_NOT_VALID.getMessage(), exception.getMessage());
-
-
     }
 
     @Test
@@ -109,9 +120,24 @@ class OrderUserCaseTest {
         List<Status> invalidStatusList = List.of(Status.EN_PREPARACION, Status.PENDIENTE, Status.LISTO);
         Mockito.when(userPersistencePort.getUseAuth()).thenReturn(user);
         Mockito.when(orderPersistencePort.findByCustomerAndStatusInvalid(user.getIdUser(), invalidStatusList)).thenReturn(Optional.empty());
+        Mockito.when(menuPersistencePort.findById(anyLong())).thenReturn(Optional.of(menu));
         doNothing().when(orderPersistencePort).saveOrder(any());
         orderUserCase.saveOrder(order);
         verify(orderPersistencePort).saveOrder(order);
+    }
+
+    @Test
+    void saveOrderWhenMenuIdNotExist() {
+
+        List<Status> invalidStatusList = List.of(Status.EN_PREPARACION, Status.PENDIENTE, Status.LISTO);
+        Mockito.when(userPersistencePort.getUseAuth()).thenReturn(user);
+        Mockito.when(orderPersistencePort.findByCustomerAndStatusInvalid(user.getIdUser(), invalidStatusList)).thenReturn(Optional.empty());
+        Mockito.when(menuPersistencePort.findById(anyLong())).thenReturn(Optional.empty());
+        doNothing().when(orderPersistencePort).saveOrder(any());
+        MenuNotFoundException exception = assertThrows(MenuNotFoundException.class, () -> {
+            orderUserCase.saveOrder(order);
+        });
+        assertEquals(ExceptionResponse.RESTAURANT_VALIDATION_NOT_FOUND.getMessage(), exception.getMessage());
     }
 
     @Test

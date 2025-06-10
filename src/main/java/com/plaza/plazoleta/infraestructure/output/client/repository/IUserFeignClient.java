@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 
-@FeignClient(name = "usuarios", url = "http://localhost:8080")
+@FeignClient(name = "usuarios", url = "${feign.user.url}")
 public interface IUserFeignClient {
 
     @GetMapping("/api/user/rol/id/{id}")

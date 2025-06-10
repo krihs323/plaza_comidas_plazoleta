@@ -5,7 +5,6 @@ import com.plaza.plazoleta.application.mapper.OrderRequestMapper;
 import com.plaza.plazoleta.domain.api.IOrderServicePort;
 import com.plaza.plazoleta.domain.model.Order;
 import com.plaza.plazoleta.domain.model.PageResult;
-import com.plaza.plazoleta.domain.validation.OrderValidations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +29,7 @@ public class OrderHandler implements IOrderHandler {
 
     @Override
     public PageResult<OrderResponse> getOrderByStatus(String status, int page, int size, String sortBy, String sortDir) {
-        OrderValidations.getORderByStatus(status);
+        //TODO Validacion de dominio - AJUSTADO
         PageResult<Order> orderStatusList = orderServicePort.getOrderByStatus(status, page, size, sortBy, sortDir);
 
         return orderRequestMapper.toPageResultResponse(orderStatusList);

@@ -44,10 +44,10 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
     }
 
     @Override
-    public PageResult<Restaurant> getAllRestaurants(Integer pages) {
+    public PageResult<Restaurant> getAllRestaurants(Integer elementsByPage) {
 
         Sort sort = Sort.by(Sort.Direction.ASC , "name");
-        Pageable pageable = PageRequest.of(0, pages, sort);
+        Pageable pageable = PageRequest.of(0, elementsByPage, sort);
         Page<RestaurantEntity> restaurantRepositoryAll = restaurantRepository.findAll(pageable);
 
         List<Restaurant> domainRestaurants = restaurantRepositoryAll

@@ -2,9 +2,6 @@ package com.plaza.plazoleta.infraestructure.output.jpa.adapter;
 
 import com.plaza.plazoleta.domain.model.*;
 import com.plaza.plazoleta.domain.spi.IOrderPersistencePort;
-import com.plaza.plazoleta.infraestructure.exception.MenuNotFoundException;
-import com.plaza.plazoleta.domain.exception.ExceptionResponse;
-import com.plaza.plazoleta.infraestructure.output.jpa.entity.MenuEntity;
 import com.plaza.plazoleta.infraestructure.output.jpa.entity.OrderDetailEntity;
 import com.plaza.plazoleta.infraestructure.output.jpa.entity.OrderEntity;
 import com.plaza.plazoleta.infraestructure.output.jpa.mapper.OrderEntityMapper;
@@ -18,7 +15,6 @@ import org.springframework.data.domain.Sort;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class OrderJpaAdapter implements IOrderPersistencePort {
 
@@ -41,11 +37,10 @@ public class OrderJpaAdapter implements IOrderPersistencePort {
         OrderEntity orderSaved = orderRepository.save(orderEntityMapper.toEntity(order));
         List<OrderDetailEntity> details = new java.util.ArrayList<>();
         for (OrderDetail req : order.getOrderDetailList()) {
-            MenuEntity menuEntity = menuRepository.findById(req.getIdMenu())
-                    .orElseThrow(() -> new MenuNotFoundException(ExceptionResponse.RESTAURANT_VALIDATION_NOT_FOUND.getMessage()));
+            //TODO Validacion de dominio de los platos - AJUSTADO
             OrderDetailEntity detailEntity = new OrderDetailEntity();
             detailEntity.setOrderEntity(orderSaved);
-            detailEntity.setMenuEntity(menuEntity);
+            detailEntity.setMenuEntity(menuRepository.findById(req.getIdMenu()).orElseThrow());
             detailEntity.setAmount(req.getAmount());
             details.add(detailEntity);
         }
