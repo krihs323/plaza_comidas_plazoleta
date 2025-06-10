@@ -8,5 +8,5 @@ public interface IRestaurantHandler {
 
     void saveRestaurant(RestaurantRequest restaurantRequest);
 
-    PageResult<RestaurantListResponse> getAllRestaurants(Integer pages);
+    PageResult<RestaurantListResponse> getAllRestaurants(Integer elementsByPage);
 }

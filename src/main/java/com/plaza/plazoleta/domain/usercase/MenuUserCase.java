@@ -60,8 +60,6 @@ public class MenuUserCase implements IMenuServicePort {
 
     @Override
     public void disableMenu(Long id, Menu menu) {
-
-        //TODO El optional debe validar con el isPresent -- Ajustado
         Optional<Menu> menuFound = menuPersistencePort.findById(id);
         if (menuFound.isEmpty()) {
             throw new MenuUserCaseValidationException(ExceptionResponse.MENU_VALIATION_NOT_FOUND.getMessage());

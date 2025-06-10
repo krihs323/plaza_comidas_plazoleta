@@ -10,7 +10,7 @@ public interface IRestaurantPersistencePort {
     Restaurant saveRestaurant(Restaurant restaurant);
     Restaurant getRestaurantById(Long id);
 
-    PageResult<Restaurant> getAllRestaurants(Integer pages);
+    PageResult<Restaurant> getAllRestaurants(Integer elementsByPage);
 
     Optional<Restaurant> getRestaurantByUserId(Long idUser);
 }

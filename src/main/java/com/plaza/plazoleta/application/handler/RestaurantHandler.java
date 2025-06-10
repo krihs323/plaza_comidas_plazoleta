@@ -28,8 +28,8 @@ public class RestaurantHandler implements IRestaurantHandler {
     }
 
     @Override
-    public PageResult<RestaurantListResponse> getAllRestaurants(Integer pages) {
-        PageResult<Restaurant> restaurantList = restaurantServicePort.getAllRestaurants(pages);
+    public PageResult<RestaurantListResponse> getAllRestaurants(Integer elementsByPage) {
+        PageResult<Restaurant> restaurantList = restaurantServicePort.getAllRestaurants(elementsByPage);
         return restaurantRequestMapper.toPageResultResponse(restaurantList);
 
     }

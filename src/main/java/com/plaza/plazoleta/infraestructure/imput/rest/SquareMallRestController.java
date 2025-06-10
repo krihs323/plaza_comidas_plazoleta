@@ -15,8 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping(path = "/api/plazoleta")
 public class SquareMallRestController {
@@ -48,9 +46,9 @@ public class SquareMallRestController {
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)
     })
     @GetMapping("/restaurant/all")
-    public ResponseEntity<PageResult<RestaurantListResponse>> getAllRestaurants(@Parameter(description = "Number of items")
-                                                                          @RequestParam(required = false, defaultValue = "0") Integer pages) {
-        return ResponseEntity.ok(restaurantHandler.getAllRestaurants(pages));
+    public ResponseEntity<PageResult<RestaurantListResponse>> getAllRestaurants(@Parameter(description = "Elements for page")
+                                                                          @RequestParam(required = false, defaultValue = "0") Integer elementsByPage) {
+        return ResponseEntity.ok(restaurantHandler.getAllRestaurants(elementsByPage));
     }
 
     @Operation(summary = "Add a new menu")

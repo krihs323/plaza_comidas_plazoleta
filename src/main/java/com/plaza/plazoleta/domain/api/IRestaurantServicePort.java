@@ -7,5 +7,5 @@ public interface IRestaurantServicePort {
 
     void saveRestaurant(Restaurant restaurant);
 
-    PageResult<Restaurant> getAllRestaurants(Integer pages);
+    PageResult<Restaurant> getAllRestaurants(Integer elementsByPage);
 }
